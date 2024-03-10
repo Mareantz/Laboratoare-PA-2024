@@ -1,10 +1,8 @@
 package VehicleRoutingProblem;
+
 import java.util.List;
 import java.util.ArrayList;
 
-/**
- *
- */
 public abstract class Vehicle
 {
     private Depot depot;
@@ -14,17 +12,17 @@ public abstract class Vehicle
 
     private int id; // poate fi nr de sasiu etc
 
-    public void performTour(List<Client> clients)
+    public void performTour()
     {
-        System.out.println("Starting from depot: " + depot.getName());
-        for (Client client : clients)
+        System.out.println("Vehicle " + this.getId() + " is starting from depot: " + depot.getName());
+        for (Client client : this.getClients())
         {
-            System.out.println("Visiting client: " + client.getName());
+            System.out.println("Vehicle " + this.getId() + " is visiting client: " + client.getName());
         }
-        System.out.println("Returning to depot: " + depot.getName());
+        System.out.println("Vehicle " + this.getId() + " is returning to depot: " + depot.getName());
     }
 
-    public Vehicle(Depot depot, int id,boolean available)
+    public Vehicle(Depot depot, int id, boolean available)
     {
         this.depot = depot;
         this.id = id;
@@ -55,15 +53,18 @@ public abstract class Vehicle
         this.available = available;
     }
 
-    public void assignClient(Client client) {
+    public void assignClient(Client client)
+    {
         clients.add(client);
     }
 
-    public List<Client> getClients() {
+    public List<Client> getClients()
+    {
         return clients;
     }
 
-    public void setClients(List<Client> clients) {
+    public void setClients(List<Client> clients)
+    {
         this.clients = clients;
     }
 
@@ -72,21 +73,22 @@ public abstract class Vehicle
         return id;
     }
 
-    public Client getLastClient() {
-        if (clients.isEmpty()) {
+    public Client getLastClient()
+    {
+        if (clients.isEmpty())
+        {
             return null;
-        } else {
+        }
+        else
+        {
             return clients.get(clients.size() - 1);
         }
     }
 
     @Override
-    public String toString() {
-        return getClass().getSimpleName() + "{" +
-                "depot=" + depot +
-                ", available=" + available +
-                ", id=" + id +
-                '}';
+    public String toString()
+    {
+        return getClass().getSimpleName() + "{" + "depot=" + depot + ", available=" + available + ", id=" + id + '}';
     }
 
     @Override

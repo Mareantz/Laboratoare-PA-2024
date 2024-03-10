@@ -1,20 +1,23 @@
 package VehicleRoutingProblem;
+
 import java.time.LocalTime;
+
 public class Client
 {
     private enum type
     {
-        regular,premium
+        regular, premium
     }
+
     private int id;
     private final String name;
     private LocalTime visitStartTime;
     private LocalTime visitEndTime;
 
-    public Client(String name,int id, LocalTime visitStartTime, LocalTime visitEndTime)
+    public Client(String name, int id, LocalTime visitStartTime, LocalTime visitEndTime)
     {
         this.name = name;
-        this.id=id;
+        this.id = id;
         this.visitStartTime = visitStartTime;
         this.visitEndTime = visitEndTime;
     }
@@ -54,9 +57,9 @@ public class Client
     {
         return "Client{" +
                 "id=" + id +
-                ", name='" + name + '\'' +
-                ", visitStartTime=" + visitStartTime +
-                ", visitEndTime=" + visitEndTime +
+//                ", name='" + name + '\'' +
+//                ", visitStartTime=" + visitStartTime +
+//                ", visitEndTime=" + visitEndTime +
                 '}';
     }
 
@@ -72,6 +75,6 @@ public class Client
             return false;
         }
         Client guest = (Client) obj;
-        return id==guest.id; // id is unique so it's enough
+        return id == guest.id; // id is unique so it's enough
     }
 }

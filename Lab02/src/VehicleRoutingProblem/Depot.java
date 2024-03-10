@@ -1,10 +1,11 @@
 package VehicleRoutingProblem;
+
 import java.util.List;
+
 public class Depot
 {
     private String name;
     private Vehicle[] vehicles = new Vehicle[256];
-    private Client[] clients = new Client[256];
     private int vehicleCount;
     private int clientCount;
     private int maxVehicles;
@@ -86,15 +87,18 @@ public class Depot
         this.vehicles = vehicles;
     }
 
-    public void assignClient(Client client, int[][] depotToClientTimes, List<Client> allClients, int depotIndex) {
+    public void assignClient(Client client, int[][] depotToClientTimes, List<Client> allClients, int depotIndex)
+    {
         Vehicle quickestVehicle = null;
         int quickestTime = Integer.MAX_VALUE;
 
-        for (Vehicle vehicle : vehicles) {
+        for (Vehicle vehicle : vehicles)
+        {
             int clientIndex = allClients.indexOf(client);
             int travelTime = depotToClientTimes[depotIndex][clientIndex];
 
-            if (travelTime < quickestTime) {
+            if (travelTime < quickestTime)
+            {
                 quickestVehicle = vehicle;
                 quickestTime = travelTime;
             }
