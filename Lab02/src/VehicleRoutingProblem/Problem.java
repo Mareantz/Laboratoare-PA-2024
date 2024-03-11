@@ -9,13 +9,36 @@ import java.time.LocalTime;
 import java.util.Map;
 import java.util.HashMap;
 
+/**
+ * The Problem class represents a vehicle routing problem.
+ * It contains a list of depots and clients, and the travel times between them.
+ */
 public class Problem
 {
+    /**
+     * A list of depots in the problem.
+     */
     private List<Depot> depots;
+    /**
+     * A list of clients in the problem.
+     */
     private List<Client> clients;
+    /**
+     * A 2D array representing the travel times from each depot to each client.
+     */
     private int[][] depotToClientTimes;
+    /**
+     * A 2D array representing the travel times from each client to each other client.
+     */
     private int[][] clientToClientTimes;
 
+    /**
+     * Constructs a new Problem with the given depots and clients.
+     * Also generates the travel times between depots and clients.
+     *
+     * @param depots  the depots
+     * @param clients the clients
+     */
     public Problem(List<Depot> depots, List<Client> clients)
     {
         this.depots = depots;
@@ -23,6 +46,11 @@ public class Problem
         generateTravelTimes();
     }
 
+    /**
+     * Returns an array of all vehicles in all depots.
+     *
+     * @return the vehicle array
+     */
     public Vehicle[] getVehicles()
     {
         List<Vehicle> allVehicles = new ArrayList<>();
@@ -32,6 +60,10 @@ public class Problem
         }
         return allVehicles.toArray(new Vehicle[0]);
     }
+
+    /**
+     * Generates random travel times between depots and clients, and between clients.
+     */
 
     private void generateTravelTimes()
     {
@@ -80,6 +112,11 @@ public class Problem
 
     }
 
+    /**
+     * Assigns clients to vehicles based on their visit start times and the travel times.
+     * If a client cannot be assigned to a vehicle, a message is printed.
+     * After all clients are assigned, each vehicle performs its tour.
+     */
     public void assignClients()
     {
         clients.sort(Comparator.comparing(Client::getVisitStartTime));
