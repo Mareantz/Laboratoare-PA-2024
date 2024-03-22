@@ -25,4 +25,9 @@ public class Statue extends Attraction implements Visitable
         return this.timetable;
     }
 
+    @Override
+    public String getType() {
+        return "Church";
+    }
+
 }

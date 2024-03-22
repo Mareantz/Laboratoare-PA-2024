@@ -38,4 +38,14 @@ public class Graph
     {
         return edges.get(node);
     }
+
+    public void connectSameTypeAttractions() {
+        for (Node node1 : nodes) {
+            for (Node node2 : nodes) {
+                if (node1 != node2 && node1.getAttraction().getType().equals(node2.getAttraction().getType())) {
+                    addEdge(node1, node2);
+                }
+            }
+        }
+    }
 }

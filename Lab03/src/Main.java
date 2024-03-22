@@ -26,26 +26,19 @@ public class Main
         Map<LocalDate, TimeInterval> timetable1 = new HashMap<>();
         Map<LocalDate, TimeInterval> timetable2 = new HashMap<>();
         Map<LocalDate, TimeInterval> timetable3 = new HashMap<>();
-        Map<LocalDate, TimeInterval> timetable4 = new HashMap<>();
-        Map<LocalDate, TimeInterval> timetable5 = new HashMap<>();
 
         LocalDate startDate = LocalDate.now();
-        LocalDate endDate = LocalDate.now().plusDays(4);
+        LocalDate endDate = LocalDate.now().plusDays(2);
 
-        for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1))
-        {
-            timetable1.put(date, new TimeInterval(LocalTime.of(9, 0), LocalTime.of(17, 0)));
-            timetable2.put(date, new TimeInterval(LocalTime.of(10, 0), LocalTime.of(18, 0)));
-            timetable3.put(date, new TimeInterval(LocalTime.of(11, 0), LocalTime.of(19, 0)));
-            timetable4.put(date, new TimeInterval(LocalTime.of(12, 0), LocalTime.of(20, 0)));
-            timetable5.put(date, new TimeInterval(LocalTime.of(13, 0), LocalTime.of(21, 0)));
-        }
+        timetable1.put(startDate, new TimeInterval(LocalTime.of(9, 0), LocalTime.of(17, 0)));
+        timetable2.put(startDate.plusDays(1), new TimeInterval(LocalTime.of(10, 0), LocalTime.of(18, 0)));
+        timetable3.put(startDate.plusDays(2), new TimeInterval(LocalTime.of(11, 0), LocalTime.of(19, 0)));
 
         Statue eastStatue = new Statue("East Statue", timetable1);
         Statue northenStatue = new Statue("Northern Statue", timetable2);
         Church northernChurch = new Church("Northern Church", timetable3);
-        Church middleChurch = new Church("Middle Church", timetable4);
-        Church southChurch = new Church("South Church", timetable5);
+        Church middleChurch = new Church("Middle Church", timetable1);
+        Church southChurch = new Church("South Church", timetable2);
         Concert middleConcert = new Concert("Middle Concert", timetable1, 50.0);
         Concert beachPleaseConcert = new Concert("Beach Please Concert", timetable2, 70.0);
 
@@ -60,7 +53,7 @@ public class Main
 
         Graph graph = new Graph();
 
-        List<Integer> colorList = IntStream.rangeClosed(1, 7).boxed().collect(Collectors.toList());
+        List<Integer> colorList = IntStream.rangeClosed(1, 3).boxed().collect(Collectors.toList());
 
         for (Attraction attraction : attractions)
         {
@@ -79,11 +72,13 @@ public class Main
             }
         }
 
-        graph.addEdge(graph.getNodes().get(0), graph.getNodes().get(3));
-        graph.addEdge(graph.getNodes().get(1), graph.getNodes().get(4));
-        graph.addEdge(graph.getNodes().get(2), graph.getNodes().get(5));
+
+
+        graph.connectSameTypeAttractions();
 
         Coloring coloring = new Coloring();
+
+
 
         Trip trip = new Trip("Iasi", attractions);
         trip.setStartDate(startDate);

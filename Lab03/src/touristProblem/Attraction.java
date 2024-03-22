@@ -34,6 +34,8 @@ public abstract class Attraction implements Comparable<Attraction>
         this.name = name;
     }
 
+    public abstract String getType();
+
     @Override
     public int compareTo(Attraction other)
     {

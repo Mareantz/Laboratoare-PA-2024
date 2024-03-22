@@ -9,7 +9,7 @@ public class Coloring
     public void colorGraphByDegree(Graph graph, Trip trip)
     {
         List<Node> nodes = new ArrayList<>(graph.getNodes());
-        nodes.sort((n1, n2) -> graph.getEdges(n2).size() - graph.getEdges(n1).size());
+        nodes.sort((n1, n2) -> graph.getEdges(n1).size() - graph.getEdges(n2).size());
 
         long days = trip.getStartDate().until(trip.getEndDate(), ChronoUnit.DAYS) + 1;
 
@@ -21,14 +21,11 @@ public class Coloring
                 usedColors.add(neighbor.getColor());
             }
 
-            for (int color = 1; color <= days; color++)
-            {
+            for (int color = 1; color <= days; color++) {
                 LocalDate visitDate = trip.getStartDate().plusDays(color - 1);
-                if (!usedColors.contains(color) && node.getAttraction() instanceof Visitable)
-                {
+                if (!usedColors.contains(color) && node.getAttraction() instanceof Visitable) {
                     Map<LocalDate, TimeInterval> timetable = ((Visitable) node.getAttraction()).getTimetable();
-                    if (timetable != null && timetable.containsKey(visitDate))
-                    {
+                    if (timetable != null && timetable.containsKey(visitDate) && timetable.get(visitDate) != null) {
                         node.setColor(color);
                         break;
                     }
@@ -40,7 +37,7 @@ public class Coloring
     public void colorGraphByDSatur(Graph graph, Trip trip)
     {
         List<Node> nodes = new ArrayList<>(graph.getNodes());
-        nodes.sort((n1, n2) -> degreeOfSaturation(n2, graph) - degreeOfSaturation(n1, graph));
+        nodes.sort((n1, n2) -> degreeOfSaturation(n1, graph) - degreeOfSaturation(n2, graph));
 
         long days = trip.getStartDate().until(trip.getEndDate(), ChronoUnit.DAYS) + 1;
 
@@ -52,14 +49,11 @@ public class Coloring
                 usedColors.add(neighbor.getColor());
             }
 
-            for (int color = 1; color <= days; color++)
-            {
+            for (int color = 1; color <= days; color++) {
                 LocalDate visitDate = trip.getStartDate().plusDays(color - 1);
-                if (!usedColors.contains(color) && node.getAttraction() instanceof Visitable)
-                {
+                if (!usedColors.contains(color) && node.getAttraction() instanceof Visitable) {
                     Map<LocalDate, TimeInterval> timetable = ((Visitable) node.getAttraction()).getTimetable();
-                    if (timetable != null && timetable.containsKey(visitDate))
-                    {
+                    if (timetable != null && timetable.containsKey(visitDate) && timetable.get(visitDate) != null) {
                         node.setColor(color);
                         break;
                     }

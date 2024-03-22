@@ -38,4 +38,9 @@ public class Concert extends Attraction implements Visitable, Payable
         return ticketPrice;
     }
 
+    @Override
+    public String getType() {
+        return "Concert";
+    }
+
 }
