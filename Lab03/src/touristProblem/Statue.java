@@ -6,15 +6,23 @@ import java.util.Map;
 
 public class Statue extends Attraction implements Visitable
 {
-    @Override
-    public Map<LocalDate, TimeInterval> getTimetable()
+    private Map<LocalDate, TimeInterval> timetable;
+
+    public Statue(String name, Map<LocalDate, TimeInterval> timetable)
     {
-        return null;
+        super(name);
+        this.timetable = timetable;
+    }
+
+    public void setTimetable(Map<LocalDate, TimeInterval> timetable)
+    {
+        this.timetable = timetable;
     }
 
     @Override
-    public LocalTime getOpeningHour(LocalDate date)
+    public Map<LocalDate, TimeInterval> getTimetable()
     {
-        return Visitable.super.getOpeningHour(date);
+        return this.timetable;
     }
+
 }
