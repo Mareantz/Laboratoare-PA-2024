@@ -12,10 +12,7 @@ import touristProblem.Coloring;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -72,17 +69,21 @@ public class Main
             }
         }
 
-
-
         graph.connectSameTypeAttractions();
-
         Coloring coloring = new Coloring();
-
-
 
         Trip trip = new Trip("Iasi", attractions);
         trip.setStartDate(startDate);
         trip.setEndDate(endDate);
+
+        List<Attraction> attractionsDay1= Arrays.asList(eastStatue, middleChurch, beachPleaseConcert);
+        List<Attraction> attractionsDay2= Arrays.asList(northenStatue, northernChurch, middleConcert);
+
+        Map<LocalDate, List<Attraction>> plan= new HashMap<>();
+        plan.put(startDate, attractionsDay1);
+        plan.put(startDate.plusDays(1), attractionsDay2);
+        TravelPlan travelPlan= new TravelPlan(plan);
+        System.out.println(travelPlan);
 
         trip.displayVisitableNotPayable(LocalDate.now());
 

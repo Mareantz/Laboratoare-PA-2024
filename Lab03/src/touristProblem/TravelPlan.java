@@ -33,7 +33,7 @@ public class TravelPlan
             sb.append("Attractions: ").append("\n");
             for (Attraction attraction : entry.getValue())
             {
-                sb.append(attraction.getName());
+                sb.append(attraction.getName()).append(" will be visited on ").append(entry.getKey());
                 if (attraction instanceof Visitable)
                 {
                     TimeInterval interval = ((Visitable) attraction).getTimetable().get(entry.getKey());
