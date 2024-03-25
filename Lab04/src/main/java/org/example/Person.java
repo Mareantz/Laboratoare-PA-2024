@@ -25,7 +25,7 @@ public class Person
 
     public String getDestination()
     {
-        return destination;
+        return this.destination;
     }
 
     public void setDestination(String destination)

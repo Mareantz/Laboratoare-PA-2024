@@ -1,50 +1,32 @@
 package org.example;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
-public class Main {
-    public static void main(String[] args) {
-        Random random = new Random();
-        String[] names = {"Marian", "Dennis", "Cazan", "Sebi", "Miguel", "Luca", "Andrei"};
-        String[] destinations = {"Galati", "Vaslui", "Iasi"};
-        List<Person> persons = new ArrayList<>();
+public class Main
+{
+    public static void main(String[] args)
+    {
+        CarpoolService carpoolService = new CarpoolService(10);
 
-        // Create a random group of persons
-        for (int i = 0; i < 10; i++) {
-            String name = names[random.nextInt(names.length)];
-            String destination = destinations[random.nextInt(destinations.length)];
-            int age = random.nextInt(50) + 18;
+        Map<String, List<Person>> destinationMap = carpoolService.getDestinationMap();
+        System.out.println("\nDestination Map:");
+        destinationMap.entrySet().stream().forEach(entry ->
+        {
+            System.out.println(entry.getKey() + ":");
+            entry.getValue().stream().forEach(person -> System.out.println("\t" + person.getName()));
+        });
 
-            if (random.nextBoolean()) {
-                persons.add(new Driver(name, destination, age));
-            } else {
-                persons.add(new Passenger(name, destination, age));
+        carpoolService.matchDriversAndPassengers();
+        System.out.println("\nAfter matching drivers and passengers:");
+        carpoolService.getDrivers().stream().forEach(driver ->
+        {
+            if (driver.getPassenger() != null)
+            {
+                System.out.println(driver.getName() + " is going with " + driver.getPassenger().getName() + " to " + driver.getDestination());
+            } else
+            {
+                System.out.println(driver.getName() + " is going alone to " + driver.getDestination());
             }
-        }
-
-        List<Driver> drivers = persons.stream()
-                .filter(person -> person instanceof Driver)
-                .map(person -> (Driver) person)
-                .collect(Collectors.toList());
-
-        List<Passenger> passengers = persons.stream()
-                .filter(person -> person instanceof Passenger)
-                .map(person -> (Passenger) person)
-                .collect(Collectors.toList());
-
-        LinkedList<Driver> driverList = new LinkedList<>(drivers);
-        driverList.sort(Comparator.comparingInt(Driver::getAge));
-
-        System.out.println("Drivers:");
-
-        driverList.forEach(driver -> System.out.println(driver.getName() + ", " + driver.getAge()));
-
-        TreeSet<Passenger> passengerSet = new TreeSet<>(Comparator.comparing(Passenger::getName));
-        passengerSet.addAll(passengers);
-
-        System.out.println("\nPassengers:");
-
-        passengerSet.forEach(passenger -> System.out.println(passenger.getName() + ", " + passenger.getAge()));
+        });
     }
 }
