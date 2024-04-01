@@ -1,0 +1,17 @@
+{
+  "directory" : "path/to/master/directory",
+  "documents" : {
+    "123" : [ {
+      "name" : "Document1.txt",
+      "filePath" : "path\\to\\master\\directory\\123\\Document1.txt"
+    }, {
+      "name" : "Document2.txt",
+      "filePath" : "path\\to\\master\\directory\\123\\Document2.txt"
+    } ],
+    "456" : [ {
+      "name" : "Document2.txt",
+      "filePath" : "path\\to\\master\\directory\\456\\Document2.txt"
+    } ]
+  },
+  "path" : "path/to/master/directory"
+}

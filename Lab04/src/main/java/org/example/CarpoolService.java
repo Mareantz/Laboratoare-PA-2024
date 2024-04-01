@@ -6,9 +6,15 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import org.jgrapht.Graph;
+import org.jgrapht.alg.matching.HopcroftKarpMaximumCardinalityBipartiteMatching;
+//import org.jgrapht.alg.matching.MaximumCardinalityBipartiteMatching;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.SimpleGraph;
 
 public class CarpoolService
 {
+    private static final String[] DESTINATIONS = {"Botosani", "Vaslui", "Craiova", "Calarasi", "Iasi", "Focsani", "Galati", "Hunedoara", "Cluj", "Oradea"};
     private List<Driver> drivers;
     private List<Passenger> passengers;
     private Map<String, List<Person>> destinationMap;
@@ -28,49 +34,59 @@ public class CarpoolService
         this.passengers.add(passenger);
     }
 
-    public CarpoolService(int numberOfPeople)
-    {
+    public CarpoolService(int numberOfPeople) {
         this.drivers = new ArrayList<>();
         this.passengers = new ArrayList<>();
-        this.destinationMap = new HashMap<>();
         Faker faker = new Faker();
 
-        // Generate 10 drivers with random city names and random stops
-        IntStream.range(0, 10).forEach(i ->
-        {
+        // Generate drivers with random destinations from A to J
+        for (int i = 0; i < numberOfPeople; i++) {
             String name = faker.name().fullName();
-            String destination = faker.address().cityName();
-            int age = faker.number().numberBetween(18, 70);
-
-            Driver driver = new Driver(name, destination, age);
-
-            // Generate random stops for the driver
-            int numberOfStops = faker.number().numberBetween(1, 5);
-            Stream.generate(faker.address()::cityName)
-                    .limit(numberOfStops)
-                    .forEach(driver::addDestinationToRoute);
-
-            drivers.add(driver);
-        });
-
-        // Get all city names generated for the drivers and their stops
-        List<String> allCityNames = drivers.stream()
-                .flatMap(driver -> Stream.concat(Stream.of(driver.getDestination()), driver.getRoute().stream()))
-                .collect(Collectors.toList());
-
-        // Generate passengers whose destinations are some of the city names generated for the drivers and their stops
-        IntStream.range(0, numberOfPeople).forEach(i ->
-        {
-            String name = faker.name().fullName();
+            String destination = DESTINATIONS[faker.random().nextInt(DESTINATIONS.length)];
             int age = faker.number().numberBetween(18, 50);
 
-            // Randomly select a city name from the list of city names generated for the drivers and their stops
-            String destination = allCityNames.get(faker.number().numberBetween(0, allCityNames.size()));
+            Driver driver = new Driver(name, destination, age);
+            drivers.add(driver);
+        }
+
+        // Generate passengers with random destinations from A to J
+        for (int i = 0; i < numberOfPeople; i++) {
+            String name = faker.name().fullName();
+            String destination = DESTINATIONS[faker.random().nextInt(DESTINATIONS.length)];
+            int age = faker.number().numberBetween(18, 50);
 
             Passenger passenger = new Passenger(name, destination, age);
             passengers.add(passenger);
-        });
+        }
     }
+
+   public void findMaximumCardinalityMatching() {
+
+    Graph<Person, DefaultEdge> graph = new SimpleGraph<>(DefaultEdge.class);
+
+
+    drivers.forEach(graph::addVertex);
+    passengers.forEach(graph::addVertex);
+
+
+    for (Driver driver : drivers) {
+        for (Passenger passenger : passengers) {
+            if (driver.getDestination().equals(passenger.getDestination()) && Math.random() < 0.1) {
+                graph.addEdge(driver, passenger);
+                break;
+            }
+        }
+    }
+
+
+    HopcroftKarpMaximumCardinalityBipartiteMatching<Person, DefaultEdge> matchingAlgorithm =
+            new HopcroftKarpMaximumCardinalityBipartiteMatching<>(graph, new HashSet<>(drivers), new HashSet<>(passengers));
+    Set<DefaultEdge> matching = matchingAlgorithm.getMatching().getEdges();
+
+
+    System.out.println("Number of matchings: " + matching.size());
+}
+
 
     public void addDestination(String destination)
     {
@@ -101,4 +117,6 @@ public class CarpoolService
                     .ifPresent(driver -> driver.setPassenger(passenger));
         });
     }
+
+    
 }

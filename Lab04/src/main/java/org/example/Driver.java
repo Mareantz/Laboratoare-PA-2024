@@ -46,4 +46,9 @@ public class Driver extends Person
     {
         this.route.add(destination);
     }
+
+    @Override
+    public String toString() {
+        return "Driver{name='" + name + "', destination='" + destination + "', age=" + age + "}";
+    }
 }

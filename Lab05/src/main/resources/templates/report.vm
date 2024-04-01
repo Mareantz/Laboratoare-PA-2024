@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Repository Report</title>
+</head>
+<body>
+<h1>Repository Report</h1>
+    #foreach($person in $repository.documents.keySet())
+        #if($repository.documents.get($person))
+            #foreach($document in $repository.documents.get($person))
+            <p>Person ID: ${person.id()}, File: ${document.filePath()}</p>
+            #end
+        #else
+        <p>No documents found for this person with ID: ${person.id()}.</p>
+        #end
+    #end
+</body>
+</html>
