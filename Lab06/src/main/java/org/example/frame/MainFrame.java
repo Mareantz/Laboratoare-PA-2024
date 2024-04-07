@@ -1,4 +1,6 @@
-package org.example;
+package org.example.frame;
+
+import org.example.game.GameBoard;
 
 import javax.swing.*;
 import java.awt.*;
@@ -7,6 +9,7 @@ public class MainFrame extends JFrame {
     ConfigPanel configPanel;
     ControlPanel controlPanel;
     DrawingPanel canvas;
+    GameBoard gameBoard;
 
     public MainFrame() {
         super("Grid Game");
@@ -25,7 +28,5 @@ public class MainFrame extends JFrame {
         add(configPanel, BorderLayout.NORTH);
         add(canvas, BorderLayout.CENTER);
         add(controlPanel, BorderLayout.SOUTH);
-
-        pack();
     }
 }
