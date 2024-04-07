@@ -7,41 +7,49 @@ import java.io.ObjectOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
-public class Node implements Serializable {
+public class Node implements Serializable
+{
     private static final long serialVersionUID = 2L;
     private int row;
     private int col;
     private Stone stone;
     private List<Node> adjacentNodes;
 
-    public Node(int row, int col) {
+    public Node(int row, int col)
+    {
         this.row = row;
         this.col = col;
         this.stone = null;
         this.adjacentNodes = new ArrayList<>();
     }
 
-    public int getRow() {
+    public int getRow()
+    {
         return row;
     }
 
-    public int getCol() {
+    public int getCol()
+    {
         return col;
     }
 
-    public Stone getStone() {
+    public Stone getStone()
+    {
         return stone;
     }
 
-    public void setStone(Stone stone) {
+    public void setStone(Stone stone)
+    {
         this.stone = stone;
     }
 
-    public boolean hasStone() {
+    public boolean hasStone()
+    {
         return stone != null;
     }
 
-    public List<Node> getAdjacentNodes() {
+    public List<Node> getAdjacentNodes()
+    {
         return adjacentNodes;
     }
 }

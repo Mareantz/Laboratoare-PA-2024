@@ -5,18 +5,21 @@ import org.example.game.GameBoard;
 import javax.swing.*;
 import java.awt.*;
 
-public class MainFrame extends JFrame {
+public class MainFrame extends JFrame
+{
     ConfigPanel configPanel;
     ControlPanel controlPanel;
     DrawingPanel canvas;
     GameBoard gameBoard;
 
-    public MainFrame() {
+    public MainFrame()
+    {
         super("Grid Game");
         init();
     }
 
-    private void init() {
+    private void init()
+    {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(800, 600);
         setLocationRelativeTo(null);

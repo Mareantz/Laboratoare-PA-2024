@@ -63,15 +63,11 @@ public class DrawingPanel extends JPanel
                 double cellWidth = (double) getWidth() / gameBoard.getNodes()[0].length;
                 double cellHeight = (double) getHeight() / gameBoard.getNodes().length;
 
-
                 int row = (int) (e.getY() / cellHeight);
                 int col = (int) (e.getX() / cellWidth);
 
-
-
                 int circleDiameter = (int) Math.min(cellWidth, cellHeight) / 2;
                 int circleRadius = circleDiameter / 2;
-
 
                 double xInCell = e.getX() % cellWidth;
                 double yInCell = e.getY() % cellHeight;
@@ -137,7 +133,6 @@ public class DrawingPanel extends JPanel
         lastSelectedNode = null;
         isRedTurn = true;
     }
-
 
 
     @Override
@@ -239,8 +234,9 @@ public class DrawingPanel extends JPanel
         }
     }
 
-    public GameBoard getGameBoard() {
-    return gameBoard;
-}
+    public GameBoard getGameBoard()
+    {
+        return gameBoard;
+    }
 
 }

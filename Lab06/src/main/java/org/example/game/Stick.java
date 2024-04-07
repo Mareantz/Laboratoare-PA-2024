@@ -1,19 +1,23 @@
 package org.example.game;
 
-public class Stick {
+public class Stick
+{
     private Node startNode;
     private Node endNode;
 
-    public Stick(Node startNode, Node endNode) {
+    public Stick(Node startNode, Node endNode)
+    {
         this.startNode = startNode;
         this.endNode = endNode;
     }
 
-    public Node getStartNode() {
+    public Node getStartNode()
+    {
         return startNode;
     }
 
-    public Node getEndNode() {
+    public Node getEndNode()
+    {
         return endNode;
     }
 }
