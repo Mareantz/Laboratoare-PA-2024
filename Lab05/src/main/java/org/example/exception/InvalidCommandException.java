@@ -1,7 +1,9 @@
 package org.example.exception;
 
-public class InvalidCommandException extends Exception {
-    public InvalidCommandException(String message) {
+public class InvalidCommandException extends Exception
+{
+    public InvalidCommandException(String message)
+    {
         super(message);
     }
 }

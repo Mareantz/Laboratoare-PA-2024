@@ -6,21 +6,25 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.example.model.Person;
 import org.example.model.PersonKeySerializer;
 import org.example.repository.Repository;
+
 import java.io.IOException;
 import java.nio.file.Paths;
 
-public class ExportCommand extends Command {
+public class ExportCommand extends Command
+{
     private Repository repository;
     private String outputPath;
 
-    public ExportCommand(String[] args, Repository repository) {
+    public ExportCommand(String[] args, Repository repository)
+    {
         super(args);
         this.repository = repository;
-        this.outputPath = (args != null && args.length > 0) ? args[0] : "export.json";  // Use default output file path if no argument is provided
+        this.outputPath = (args != null && args.length > 0) ? args[0] : "export.json";  //default
     }
 
     @Override
-    public void execute() {
+    public void execute()
+    {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 
@@ -29,9 +33,11 @@ public class ExportCommand extends Command {
         module.addKeySerializer(Person.class, new PersonKeySerializer());
         mapper.registerModule(module);
 
-        try {
+        try
+        {
             mapper.writeValue(Paths.get(outputPath).toFile(), repository);
-        } catch (IOException e) {
+        } catch (IOException e)
+        {
             System.out.println("Error exporting repository: " + e.getMessage());
         }
     }
