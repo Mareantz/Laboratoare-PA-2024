@@ -17,7 +17,6 @@ public class DBConnection {
             Class.forName("com.mysql.cj.jdbc.Driver");
             this.connection = DriverManager.getConnection(url, username, password);
 
-            // Create and execute SQL script
             Statement statement = connection.createStatement();
             statement.execute("CREATE DATABASE IF NOT EXISTS bookstore");
             statement.execute("USE bookstore");
