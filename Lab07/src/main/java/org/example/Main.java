@@ -1,22 +1,22 @@
 package org.example;
 
-import org.example.game.Bag;
-import org.example.game.Player;
 import org.example.game.Game;
+import org.example.game.Player;
 
 public class Main
 {
     public static void main(String[] args)
     {
-        System.out.println("Hello world!");
-        Bag bag1=new Bag(30);
-        System.out.println(bag1);
+        Game game = new Game(7);
 
-        Game game1;
-        game1 = new Game(3,30);
-        game1.addPlayer(new Player("Player 1"));
-        game1.addPlayer(new Player("Player 2"));
-        game1.addPlayer(new Player("Player 3"));
-        game1.play();
+        Player player1 = new Player("Marian");
+        Player player2 = new Player("Dennis");
+        Player player3 = new Player("Cazan");
+
+        game.addPlayer(player1);
+        game.addPlayer(player2);
+        game.addPlayer(player3);
+
+        game.play(); // Start the game
     }
 }

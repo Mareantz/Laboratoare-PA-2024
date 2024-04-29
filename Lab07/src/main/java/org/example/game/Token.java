@@ -2,19 +2,30 @@ package org.example.game;
 
 public class Token
 {
-    private final int value1,value2;
-    public Token(int value1, int value2)
+    private final int first, second;
+
+    public Token(int first, int second)
     {
-        this.value1=value1;
-        this.value2=value2;
+        this.first = first;
+        this.second = second;
+    }
+
+    public int getFirst()
+    {
+        return first;
+    }
+
+    public int getSecond()
+    {
+        return second;
     }
 
     @Override
     public String toString()
     {
         return "Token{" +
-                "value1=" + value1 +
-                ", value2=" + value2 +
+                "first=" + first +
+                ", second=" + second +
                 '}';
     }
 }

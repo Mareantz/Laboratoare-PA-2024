@@ -1,73 +1,38 @@
 package org.example.game;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.Collections;
+import java.util.*;
 
 public class Bag
 {
-    private List<Token> tokens;
-    private int numberOfTokens;
-    private Random rand;
+    private final Queue<Token> tiles;
 
-    public Bag(int numberOfTokens)
+    public Bag(int n)
     {
-        this.numberOfTokens = numberOfTokens;
-        this.tokens = new ArrayList<>(numberOfTokens);
-        this.rand = new Random();
-        List<Integer> values = IntStream.range(1, 1001).boxed().collect(Collectors.toList());
-        Collections.shuffle(values, rand);
-
-        // Take the first numberOfTokens values from the shuffled list
-        values = values.subList(0, numberOfTokens);
-        int value1,value2;
-        int firstValue=values.get(0);
-        value1=values.remove(0);
-        for (int i = 0; i < numberOfTokens; i++)
+        this.tiles = new LinkedList<>();
+        for (int i = 1; i <= n; i++)
         {
-            if(i==numberOfTokens-1)
+            for (int j = 1; j <= n; j++)
             {
-                value2=firstValue;
-                tokens.add(new Token(value1,value2));
-                break;
+                if (i != j)
+                {
+                    tiles.add(new Token(i, j));
+                }
             }
-            value2=values.remove(0);
-            tokens.add(new Token(value1,value2));
-            value1=value2;
         }
+        Collections.shuffle((List<?>) tiles);
     }
 
-    public synchronized List<Token> extractTokens(int howMany)
+    public synchronized Token extractTile()
     {
-        List<Token> extracted = new ArrayList<>();
-        for (int i = 0; i < howMany; i++)
+        if (tiles.isEmpty())
         {
-            if (tokens.isEmpty())
-            {
-                break;
-            }
-            int randomIndex= rand.nextInt(tokens.size());
-            Token extractedToken=tokens.remove(randomIndex);
-            extracted.add(extractedToken);
+            return null;
         }
-        this.numberOfTokens = tokens.size();
-        return extracted;
+        return tiles.poll();
     }
 
-    @Override
-    public String toString()
+    public boolean isEmpty()
     {
-        return "Bag{" +
-                "tokens=" + tokens +
-                '}';
-    }
-
-    public int getNumberOfTokens()
-    {
-        return numberOfTokens;
+        return tiles.isEmpty();
     }
 }

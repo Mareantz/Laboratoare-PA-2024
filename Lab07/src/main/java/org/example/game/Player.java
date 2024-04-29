@@ -1,21 +1,19 @@
 package org.example.game;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.*;
 
 public class Player implements Runnable
 {
     private String name;
     private Game game;
-    private AtomicBoolean running;
-    private List<Token> tokens = new ArrayList<>();
-    private int maxSequenceLength = 0;
+    private boolean running = true;
+    private List<Token> tiles = new ArrayList<>();
+    private List<List<Token>> sequences = new ArrayList<>();
+    private Map<Integer, List<Token>> graph = new HashMap<>();
 
     public Player(String name)
     {
         this.name = name;
-        this.running = new AtomicBoolean(true);
     }
 
     public String getName()
@@ -28,63 +26,127 @@ public class Player implements Runnable
         this.game = game;
     }
 
-    public synchronized void stop()
+    public void run()
     {
-        this.running.set(false);
-    }
-
-    public int getMaxSequenceLength()
-    {
-        return this.maxSequenceLength;
-    }
-
-    private void createSequence() {
-    // Sort the tokens based on the first number
-    tokens.sort((t1, t2) -> Integer.compare(t1.getFirstNumber(), t2.getFirstNumber()));
-
-    // List to store the current sequence
-    List<Token> currentSequence = new ArrayList<>();
-
-    // Iterate over the tokens
-    for (Token token : tokens) {
-        // If the current sequence is empty or the last token in the sequence
-        // has the same second number as the first number of the current token,
-        // add the current token to the sequence
-        if (currentSequence.isEmpty() ||
-            currentSequence.get(currentSequence.size() - 1).getSecondNumber() == token.getFirstNumber()) {
-            currentSequence.add(token);
-        } else {
-            // If the current token cannot be added to the sequence, start a new sequence
-            currentSequence = new ArrayList<>();
-            currentSequence.add(token);
-        }
-
-        // Update the max sequence length
-        maxSequenceLength = Math.max(maxSequenceLength, currentSequence.size());
-    }
-}
-
-    public synchronized void run()
-    {
-        if (game == null || game.getBag() == null) {
-            throw new IllegalStateException("Game or bag is null");
-        }
-
-        while (running.get())
+        // Extract all tokens first
+        while (running)
         {
-            List<Token> extractedTokens = game.getBag().extractTokens(1);
-            if (extractedTokens.isEmpty())
+            synchronized (game.getMonitor())
             {
-                stop();
-                break;
-            }
-            tokens.addAll(extractedTokens);
-            createSequence();
-            if (maxSequenceLength == game.getBag().getNumberOfTokens())
-            {
-                game.endGame();
-                break;
+                while (!game.getCurrentPlayer().equals(this))
+                {
+                    try
+                    {
+                        game.getMonitor().wait();
+                    } catch (InterruptedException e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+                Token tile = game.getBag().extractTile();
+                if (tile != null)
+                {
+                    tiles.add(tile);
+                    System.out.println(name + " extracted the token (" + tile.getFirst() + ", " + tile.getSecond() + ")");
+                }
+                game.nextTurn();
             }
         }
+
+        // After all tokens are extracted, create the graph and find the longest sequence
+        createGraph();
+        List<Token> longestSequence = findLongestSequence();
+        sequences.add(longestSequence);
+    }
+
+    public void createGraph()
+    {
+        for (Token tile : tiles)
+        {
+            if (!graph.containsKey(tile.getFirst()))
+            {
+                graph.put(tile.getFirst(), new ArrayList<>());
+            }
+            graph.get(tile.getFirst()).add(tile);
+        }
+    }
+
+    public List<Token> findLongestSequence()
+    {
+        List<Token> longestSequence = new ArrayList<>();
+        for (Token tile : tiles)
+        {
+            List<Token> sequence = new ArrayList<>();
+            findLongestSequence(tile, sequence);
+            if (sequence.size() > longestSequence.size())
+            {
+                longestSequence = sequence;
+            }
+        }
+        return longestSequence;
+    }
+
+    private void findLongestSequence(Token tile, List<Token> sequence)
+    {
+        sequence.add(tile);
+        List<Token> nextTiles = graph.get(tile.getSecond());
+        if (nextTiles != null)
+        {
+            for (Token nextTile : nextTiles)
+            {
+                if (!sequence.contains(nextTile))
+                {
+                    findLongestSequence(nextTile, sequence);
+                }
+            }
+        }
+    }
+
+    public List<List<Token>> getSequences()
+    {
+        return sequences;
+    }
+
+    public void stop()
+    {
+        running = false;
+    }
+
+    private void addTileToSequences(Token tile)
+    {
+        for (List<Token> sequence : sequences)
+        {
+            Token lastTileInSequence = sequence.get(sequence.size() - 1);
+            if (tile.getFirst() == lastTileInSequence.getSecond() + 1)
+            {
+                sequence.add(tile);
+                return;
+            }
+        }
+        // If the tile doesn't fit into any existing sequence, start a new sequence
+        List<Token> newSequence = new ArrayList<>();
+        newSequence.add(tile);
+        sequences.add(newSequence);
+    }
+
+    public int getScore()
+    {
+        List<List<Token>> sequencesCopy = new ArrayList<>(sequences);
+        return sequencesCopy.stream().mapToInt(List::size).max().orElse(0);
+    }
+
+    public List<Token> getLongestSequence()
+    {
+        List<Token> longestSequence = null;
+        int maxSequenceLength = 0;
+        for (List<Token> sequence : sequences)
+        {
+            if (sequence.size() > maxSequenceLength)
+            {
+                maxSequenceLength = sequence.size();
+                longestSequence = sequence;
+            }
+        }
+        return longestSequence;
     }
 }
