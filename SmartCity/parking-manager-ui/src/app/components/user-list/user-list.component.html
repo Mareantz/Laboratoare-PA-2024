@@ -1,0 +1,9 @@
+<div class="container mt-5">
+  <h2>User List</h2>
+  <ul class="list-group">
+    <li *ngFor="let user of users" class="list-group-item d-flex justify-content-between align-items-center">
+      <span>{{ user.username }} ({{ user.email }})</span>
+      <button class="btn btn-danger btn-sm" (click)="deleteUser(user.userId)">Delete</button>
+    </li>
+  </ul>
+</div>
