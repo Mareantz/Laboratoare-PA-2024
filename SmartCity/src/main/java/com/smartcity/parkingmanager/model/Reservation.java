@@ -1,9 +1,12 @@
 package com.smartcity.parkingmanager.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "reservations")
 public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -11,14 +14,17 @@ public class Reservation {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "parking_lot_id", nullable = false)
+    @JsonBackReference
     private ParkingLot parkingLot;
 
     @ManyToOne
     @JoinColumn(name = "parking_space_id", nullable = false)
+    @JsonBackReference
     private ParkingSpace parkingSpace;
 
     private LocalDateTime reservedAt;

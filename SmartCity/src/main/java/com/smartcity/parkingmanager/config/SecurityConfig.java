@@ -27,7 +27,7 @@ public class SecurityConfig {
         http.csrf().disable()
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/users/register", "/api/users/login").permitAll()
-                        .requestMatchers("/api/parking-lots/**").permitAll()
+                        .requestMatchers("/api/parking-lots/**","/api/reservations/**").permitAll()
                         .requestMatchers("/api/users/**").hasRole("ADMIN") // Ensure correct role check
                         .anyRequest().authenticated())
                 .httpBasic(); // Use HTTP Basic authentication

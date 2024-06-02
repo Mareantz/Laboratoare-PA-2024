@@ -11,7 +11,9 @@ import com.smartcity.parkingmanager.repository.ParkingSpaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.time.LocalDateTime;
+
 @Service
 public class ReservationService {
 
@@ -27,16 +29,21 @@ public class ReservationService {
     @Autowired
     private ParkingSpaceRepository parkingSpaceRepository;  // Add this
 
-    public void createReservation(Long userId, Long parkingLotId, Long parkingSpaceId) {
+    public void createReservation(Long userId, Long parkingLotId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
         ParkingLot parkingLot = parkingLotRepository.findById(parkingLotId).orElseThrow(() -> new IllegalArgumentException("Invalid parking lot ID"));
-        ParkingSpace parkingSpace = parkingSpaceRepository.findById(parkingSpaceId).orElseThrow(() -> new IllegalArgumentException("Invalid parking space ID"));  // Add this
+        ParkingSpace parkingSpace = parkingSpaceRepository.findFirstByParkingLotParkingLotIdAndIsReservedFalse(parkingLotId).orElseThrow(() -> new IllegalArgumentException("Invalid parking space ID"));  // Add this
 
         Reservation reservation = new Reservation();
         reservation.setUser(user);
         reservation.setParkingLot(parkingLot);
-        reservation.setParkingSpace(parkingSpace);  // Add this
+        reservation.setParkingSpace(parkingSpace);
+        reservation.setReservedAt(LocalDateTime.now());// Add this
 
         reservationRepository.save(reservation);
+    }
+
+    public List<Reservation> getALlReservations() {
+        return reservationRepository.findAll();
     }
 }
