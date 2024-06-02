@@ -1,6 +1,7 @@
 package com.smartcity.parkingmanager.controller;
 
 import com.smartcity.parkingmanager.model.User;
+import com.smartcity.parkingmanager.model.UserRole;
 import com.smartcity.parkingmanager.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,23 +29,23 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
-        user.setRole("USER"); // Default role
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRole(UserRole.USER); // Or UserRole.ADMIN for admin users
         userService.saveUser(user);
-        return ResponseEntity.ok("User registered successfully");
+        return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody User user) {
         Optional<User> existingUser = userService.findByUsername(user.getUsername());
         if (existingUser.isPresent() && passwordEncoder.matches(user.getPassword(), existingUser.get().getPassword())) {
-            Map<String, String> response = new HashMap<>();
+            Map<String, Object> response = new HashMap<>();
             response.put("message", "Login successful");
-            response.put("role", existingUser.get().getRole()); // Include role in response
+            response.put("userId", existingUser.get().getUserId());
+            response.put("username", existingUser.get().getUsername());
             return ResponseEntity.ok(response);
         } else {
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "Invalid credentials");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
     }
 

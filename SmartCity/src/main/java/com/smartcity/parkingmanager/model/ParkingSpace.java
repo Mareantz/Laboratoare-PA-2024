@@ -1,75 +1,54 @@
 package com.smartcity.parkingmanager.model;
 
 import jakarta.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "parking_spaces")
 public class ParkingSpace {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long spaceId;
+    private Long parkingSpaceId;
 
     @ManyToOne
-    @JoinColumn(name = "lot_id", nullable = false)
+    @JoinColumn(name = "parking_lot_id", nullable = false)
     private ParkingLot parkingLot;
 
-    @Column(nullable = false)
-    private String spaceNumber;
+    @OneToMany(mappedBy = "parkingSpace", cascade = CascadeType.ALL)
+    private Set<Reservation> reservations = new HashSet<>();
 
-    private boolean isReserved;
+    private boolean isAvailable;
 
-    @OneToMany(mappedBy = "parkingSpace", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<Reservation> reservations;
-
-    public Long getSpaceId()
-    {
-        return spaceId;
+    // Getters and setters
+    public Long getParkingSpaceId() {
+        return parkingSpaceId;
     }
 
-    public void setSpaceId(Long spaceId)
-    {
-        this.spaceId = spaceId;
+    public void setParkingSpaceId(Long parkingSpaceId) {
+        this.parkingSpaceId = parkingSpaceId;
     }
 
-    public ParkingLot getParkingLot()
-    {
+    public ParkingLot getParkingLot() {
         return parkingLot;
     }
 
-    public void setParkingLot(ParkingLot parkingLot)
-    {
+    public void setParkingLot(ParkingLot parkingLot) {
         this.parkingLot = parkingLot;
     }
 
-    public String getSpaceNumber()
-    {
-        return spaceNumber;
-    }
-
-    public void setSpaceNumber(String spaceNumber)
-    {
-        this.spaceNumber = spaceNumber;
-    }
-
-    public boolean isReserved()
-    {
-        return isReserved;
-    }
-
-    public void setReserved(boolean reserved)
-    {
-        isReserved = reserved;
-    }
-
-    public Set<Reservation> getReservations()
-    {
+    public Set<Reservation> getReservations() {
         return reservations;
     }
 
-    public void setReservations(Set<Reservation> reservations)
-    {
+    public void setReservations(Set<Reservation> reservations) {
         this.reservations = reservations;
+    }
+
+    public boolean isAvailable() {
+        return isAvailable;
+    }
+
+    public void setAvailable(boolean available) {
+        isAvailable = available;
     }
 }

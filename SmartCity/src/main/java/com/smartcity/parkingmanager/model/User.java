@@ -1,32 +1,31 @@
 package com.smartcity.parkingmanager.model;
 
 import jakarta.persistence.*;
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
-    @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(nullable = false)
-    private String password;
-
-    @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
-    private String role; // Add role field
+    private String password;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<Reservation> reservations;
+    private String phone;
 
-    // Getters and setters
+    @Enumerated(EnumType.STRING)
+    private UserRole role;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Reservation> reservations;
+
+    // Getters and Setters
+
     public Long getUserId() {
         return userId;
     }
@@ -59,11 +58,27 @@ public class User {
         this.password = password;
     }
 
-    public String getRole() {
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public UserRole getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(UserRole role) {
         this.role = role;
+    }
+
+    public List<Reservation> getReservations() {
+        return reservations;
+    }
+
+    public void setReservations(List<Reservation> reservations) {
+        this.reservations = reservations;
     }
 }

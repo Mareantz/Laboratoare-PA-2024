@@ -24,13 +24,12 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf().disable()
+        http.csrf().disable()
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/users/register", "/api/users/login").permitAll()
-                        .requestMatchers("/api/users/**").hasRole("ROLE_ADMIN")
-                        .anyRequest().authenticated()
-                )
+                        .requestMatchers("/api/parking-lots/**").permitAll()
+                        .requestMatchers("/api/users/**").hasRole("ADMIN") // Ensure correct role check
+                        .anyRequest().authenticated())
                 .httpBasic(); // Use HTTP Basic authentication
 
         return http.build();

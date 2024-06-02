@@ -3,7 +3,9 @@ package com.smartcity.parkingmanager.controller;
 import com.smartcity.parkingmanager.model.ParkingLot;
 import com.smartcity.parkingmanager.service.ParkingLotService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -18,21 +20,4 @@ public class ParkingLotController {
     public List<ParkingLot> getAllParkingLots() {
         return parkingLotService.getAllParkingLots();
     }
-
-    @GetMapping("/{id}")
-    public ParkingLot getParkingLotById(@PathVariable Long id) {
-        return parkingLotService.getParkingLotById(id);
-    }
-
-    @PostMapping
-    public ParkingLot createParkingLot(@RequestBody ParkingLot parkingLot) {
-        parkingLot.setAvailableSpaces(parkingLot.getCapacity());
-        return parkingLotService.saveParkingLot(parkingLot);
-    }
-
-    @DeleteMapping("/{id}")
-    public void deleteParkingLot(@PathVariable Long id) {
-        parkingLotService.deleteParkingLot(id);
-    }
 }
-

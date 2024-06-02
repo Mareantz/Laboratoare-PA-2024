@@ -1,38 +1,42 @@
 package com.smartcity.parkingmanager.service;
 
 import com.smartcity.parkingmanager.model.Reservation;
+import com.smartcity.parkingmanager.model.User;
+import com.smartcity.parkingmanager.model.ParkingLot;
 import com.smartcity.parkingmanager.repository.ReservationRepository;
+import com.smartcity.parkingmanager.repository.UserRepository;
+import com.smartcity.parkingmanager.repository.ParkingLotRepository;
+import com.smartcity.parkingmanager.model.ParkingSpace;
+import com.smartcity.parkingmanager.repository.ParkingSpaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
+import java.time.LocalDateTime;
 @Service
-public class ReservationService
-{
+public class ReservationService {
+
     @Autowired
     private ReservationRepository reservationRepository;
 
-    public List<Reservation> getAllReservations() {
-        return reservationRepository.findAll();
-    }
+    @Autowired
+    private UserRepository userRepository;
 
-    public Reservation saveReservation(Reservation reservation) {
-        return reservationRepository.save(reservation);
-    }
+    @Autowired
+    private ParkingLotRepository parkingLotRepository;
 
-    public Reservation getReservationById(Long reservationId)
-    {
-        return reservationRepository.findById(reservationId).orElse(null);
-    }
+    @Autowired
+    private ParkingSpaceRepository parkingSpaceRepository;  // Add this
 
-    public void deleteReservation(Long reservationId)
-    {
-        reservationRepository.deleteById(reservationId);
-    }
+    public void createReservation(Long userId, Long parkingLotId, Long parkingSpaceId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+        ParkingLot parkingLot = parkingLotRepository.findById(parkingLotId).orElseThrow(() -> new IllegalArgumentException("Invalid parking lot ID"));
+        ParkingSpace parkingSpace = parkingSpaceRepository.findById(parkingSpaceId).orElseThrow(() -> new IllegalArgumentException("Invalid parking space ID"));  // Add this
 
-    public List<Reservation> getReservationsByUserId(Long userId)
-    {
-        return reservationRepository.findByUser_UserId(userId);
+        Reservation reservation = new Reservation();
+        reservation.setUser(user);
+        reservation.setParkingLot(parkingLot);
+        reservation.setParkingSpace(parkingSpace);  // Add this
+
+        reservationRepository.save(reservation);
     }
 }

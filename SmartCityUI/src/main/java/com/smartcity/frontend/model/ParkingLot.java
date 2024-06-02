@@ -1,36 +1,18 @@
-package com.smartcity.parkingmanager.model;
+package com.smartcity.frontend.model;
 
-import jakarta.persistence.*;
 import java.util.List;
 
-@Entity
-@Table(name = "parking_lots")
 public class ParkingLot {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "parking_lot_id")
     private Long parkingLotId;
-
-    @Column(name = "name", nullable = false)
     private String name;
-
-    @Column(name = "address", nullable = false)
     private String address;
-
-    @Column(name = "capacity", nullable = false)
     private int capacity;
-
-    @Column(name = "available_spaces", nullable = false)
     private int availableSpaces;
+    private List<ParkingSpace> parkingSpaces; // Add this line
+    private List<Reservation> reservations;   // Add this line
 
-    @OneToMany(mappedBy = "parkingLot", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ParkingSpace> parkingSpaces;
+    // Getters and setters
 
-    @OneToMany(mappedBy = "parkingLot", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Reservation> reservations;
-
-    // Getters and Setters
     public Long getParkingLotId() {
         return parkingLotId;
     }
