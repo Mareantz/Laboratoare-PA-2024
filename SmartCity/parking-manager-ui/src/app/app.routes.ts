@@ -5,6 +5,7 @@ import { RegisterComponent } from './components/register/register.component';
 import { UserListComponent } from './components/user-list/user-list.component';
 import { ParkingLotListComponent } from './components/parking-lot-list/parking-lot-list.component';
 import { ParkingLotFormComponent } from './components/parking-lot-form/parking-lot-form.component';
+import { UserPanelComponent } from './components/user-panel/user-panel.component';
 
 export const routes: Routes = [
     {
@@ -31,5 +32,9 @@ export const routes: Routes = [
     {
         path:'create-parking-lot',
         component: ParkingLotFormComponent
+    },
+    {
+        path:'user-panel',
+        component: UserPanelComponent
     },
 ];

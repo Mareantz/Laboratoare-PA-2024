@@ -1,15 +1,32 @@
 <div class="container mt-5">
-    <h2>Login</h2>
-    <form (ngSubmit)="login()">
-      <div class="mb-3">
-        <label for="username">Username:</label>
-        <input type="text" class="form-control" id="username" required ="user.username" name="username">
+  <h2>Login</h2>
+  <form (ngSubmit)="login()" #loginForm="ngForm">
+    <div class="mb-3">
+      <label for="username">Username:</label>
+      <input type="text" class="form-control" id="username" required [(ngModel)]="user.username" name="username">
+    </div>
+    <div class="mb-3">
+      <label for="password">Password:</label>
+      <input type="password" class="form-control" id="password" required [(ngModel)]="user.password" name="password">
+    </div>
+    <button type="submit" class="btn btn-primary">Login</button>
+  </form>
+
+  <!-- Modal -->
+  <div class="modal fade" id="loginSuccessModal" tabindex="-1" aria-labelledby="loginSuccessModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="loginSuccessModalLabel">Login Successful</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          You have successfully logged in!
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
       </div>
-      <div class="mb-3">
-        <label for="password">Password:</label>
-        <input type="password" class="form-control" id="password" required ="user.password" name="password">
-      </div>
-      <button type="submit" class="btn btn-primary">Login</button>
-    </form>
+    </div>
   </div>
-  
+</div>

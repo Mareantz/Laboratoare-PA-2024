@@ -3,13 +3,16 @@ package com.smartcity.parkingmanager.controller;
 import com.smartcity.parkingmanager.model.User;
 import com.smartcity.parkingmanager.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -20,18 +23,29 @@ public class UserController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @PostMapping("/register")
-    public User registerUser(@RequestBody User user) {
-        return userService.registerUser(user);
+    public ResponseEntity<?> registerUser(@RequestBody User user) {
+        user.setRole("USER"); // Default role
+        userService.saveUser(user);
+        return ResponseEntity.ok("User registered successfully");
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody User user) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword())
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        return "Login successful";
+    public ResponseEntity<?> loginUser(@RequestBody User user) {
+        Optional<User> existingUser = userService.findByUsername(user.getUsername());
+        if (existingUser.isPresent() && passwordEncoder.matches(user.getPassword(), existingUser.get().getPassword())) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Login successful");
+            response.put("role", existingUser.get().getRole()); // Include role in response
+            return ResponseEntity.ok(response);
+        } else {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Invalid credentials");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
     }
 
     @GetMapping
@@ -50,8 +64,25 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable Long id) {
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
+        return ResponseEntity.ok("User deleted successfully");
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User user) {
+        try {
+            Optional<User> existingUser = userService.findUserById(id);
+            if (existingUser.isPresent()) {
+                userService.updateUser(id, user);
+                return ResponseEntity.ok("User updated successfully");
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
     }
 }
+
 
