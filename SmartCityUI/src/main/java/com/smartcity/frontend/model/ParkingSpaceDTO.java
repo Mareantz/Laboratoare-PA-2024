@@ -4,7 +4,6 @@ public class ParkingSpaceDTO {
     private Long parkingSpaceId;
     private boolean reserved;
 
-    // Getters and Setters
     public Long getParkingSpaceId() {
         return parkingSpaceId;
     }

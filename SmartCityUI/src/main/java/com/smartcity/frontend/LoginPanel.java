@@ -1,5 +1,7 @@
 package com.smartcity.frontend;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -8,12 +10,12 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Scanner;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class LoginPanel extends JPanel {
     private JTextField usernameField;
     private JPasswordField passwordField;
     private JButton loginButton;
+    private JButton registerButton;
     private JLabel statusLabel;
     private JFrame frame;
 
@@ -28,6 +30,7 @@ public class LoginPanel extends JPanel {
         usernameField = new JTextField(20);
         passwordField = new JPasswordField(20);
         loginButton = new JButton("Login");
+        registerButton = new JButton("Register");
         statusLabel = new JLabel();
     }
 
@@ -45,13 +48,19 @@ public class LoginPanel extends JPanel {
         add(new JLabel("Password:"), gbc);
         gbc.gridx = 1;
         add(passwordField, gbc);
+
+        gbc.gridx = 0;
         gbc.gridy = 2;
         add(loginButton, gbc);
+        gbc.gridx = 1;
+        add(registerButton, gbc);
+
         gbc.gridx = 0;
         gbc.gridy = 3;
         gbc.gridwidth = 2;
         add(statusLabel, gbc);
     }
+
 
     private void addListeners() {
         loginButton.addActionListener(new ActionListener() {
@@ -59,8 +68,6 @@ public class LoginPanel extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 String username = usernameField.getText();
                 String password = new String(passwordField.getPassword());
-
-                // Send login request to the server
                 boolean loginSuccessful = sendLoginRequest(username, password);
 
                 if (loginSuccessful) {
@@ -70,39 +77,41 @@ public class LoginPanel extends JPanel {
                 }
             }
         });
+
+        registerButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frame.setContentPane(new RegisterPanel(frame).getPanel());
+                frame.revalidate();
+            }
+        });
     }
 
     private boolean sendLoginRequest(String username, String password) {
         try {
-            // Create the URL object for the login endpoint
             URL url = new URL("http://localhost:8081/api/users/login");
 
-            // Open connection
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type", "application/json; utf-8");
             connection.setRequestProperty("Accept", "application/json");
             connection.setDoOutput(true);
 
-            // Create JSON payload
             ObjectMapper mapper = new ObjectMapper();
             UserLoginDTO userLoginDTO = new UserLoginDTO(username, password);
             String jsonInputString = mapper.writeValueAsString(userLoginDTO);
 
-            // Send the request
             try (OutputStream os = connection.getOutputStream()) {
                 byte[] input = jsonInputString.getBytes("utf-8");
                 os.write(input, 0, input.length);
             }
 
-            // Read the response
             int responseCode = connection.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 try (Scanner scanner = new Scanner(connection.getInputStream())) {
                     String responseBody = scanner.useDelimiter("\\A").next();
                     UserDTO userDTO = mapper.readValue(responseBody, UserDTO.class);
 
-                    // Handle successful login, e.g., switch to user panel
                     frame.setContentPane(new UserPanel(userDTO.getId(), userDTO.getUsername()).getPanel());
                     frame.revalidate();
 
@@ -130,7 +139,6 @@ public class LoginPanel extends JPanel {
         frame.setVisible(true);
     }
 
-    // DTO classes
     public static class UserLoginDTO {
         private String username;
         private String password;

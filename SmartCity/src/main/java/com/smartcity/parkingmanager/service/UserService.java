@@ -2,6 +2,8 @@ package com.smartcity.parkingmanager.service;
 
 import com.smartcity.parkingmanager.model.User;
 import com.smartcity.parkingmanager.repository.UserRepository;
+import com.smartcity.parkingmanager.model.UserRole;
+import com.smartcity.parkingmanager.dto.UserRegistrationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -38,11 +40,6 @@ public class UserService implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), authorities);
     }
 
-    public User registerUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
-    }
-
     public User findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
@@ -59,6 +56,17 @@ public class UserService implements UserDetailsService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
+
+    // Optionally, you can have a method specifically for registration if needed
+    public User registerUser(UserRegistrationDTO userRegistrationDTO) {
+        User user = new User();
+        user.setUsername(userRegistrationDTO.getUsername());
+        user.setPassword(passwordEncoder.encode(userRegistrationDTO.getPassword()));
+        user.setEmail(userRegistrationDTO.getEmail());
+        user.setRole(UserRole.USER);
+        return userRepository.save(user);
+    }
+
 
     public Optional<User> findUserById(Long userId) {
         return userRepository.findById(userId);

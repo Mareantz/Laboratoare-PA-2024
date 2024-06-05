@@ -38,12 +38,14 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody UserRegistrationDTO userRegistrationDTO) {
-        User user = userMapper.toUser(userRegistrationDTO);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRole(UserRole.USER); // Or UserRole.ADMIN for admin users
-        userService.saveUser(user);
-        UserDTO userDTO = userMapper.toUserDTO(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(userDTO);
+        User user = new User();
+        user.setUsername(userRegistrationDTO.getUsername());
+        user.setPassword(userRegistrationDTO.getPassword());
+        user.setEmail(userRegistrationDTO.getEmail());
+        user.setRole(UserRole.USER);
+
+        User savedUser = userService.saveUser(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
     }
 
     @PostMapping("/login")

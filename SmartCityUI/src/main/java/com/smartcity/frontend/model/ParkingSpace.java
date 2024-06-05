@@ -4,8 +4,6 @@ public class ParkingSpace {
     private Long parkingSpaceId;
     private boolean occupied;
 
-    // Getters and setters
-
     public Long getParkingSpaceId() {
         return parkingSpaceId;
     }

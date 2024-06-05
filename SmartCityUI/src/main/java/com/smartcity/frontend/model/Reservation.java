@@ -8,8 +8,6 @@ public class Reservation {
     private Long parkingLotId;
     private LocalDateTime reservedAt;
 
-    // Getters and setters
-
     public Long getReservationId() {
         return reservationId;
     }

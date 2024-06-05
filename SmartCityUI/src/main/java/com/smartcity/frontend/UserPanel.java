@@ -1,7 +1,5 @@
 package com.smartcity.frontend;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smartcity.frontend.model.ParkingLotDTO;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -24,6 +22,8 @@ public class UserPanel {
     private JPanel panel;
     private JTable parkingLotsTable;
     private JButton reserveButton;
+    private JButton logoutButton;
+    private JLabel welcomeLabel; // Add welcome label
     private Long userId;
     private String username;
 
@@ -39,25 +39,49 @@ public class UserPanel {
 
         parkingLotsTable = new JTable();
         reserveButton = new JButton("Reserve");
+        logoutButton = new JButton("Logout");
+        welcomeLabel = new JLabel("Welcome, " + username); // Initialize welcome label
 
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.add(welcomeLabel, BorderLayout.WEST); // Add welcome label to top panel
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.add(reserveButton);
+        buttonPanel.add(logoutButton);
+
+        panel.add(topPanel, BorderLayout.NORTH); // Add top panel to main panel
         panel.add(new JScrollPane(parkingLotsTable), BorderLayout.CENTER);
-        panel.add(reserveButton, BorderLayout.SOUTH);
+        panel.add(buttonPanel, BorderLayout.SOUTH);
 
         reserveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int selectedRow = parkingLotsTable.getSelectedRow();
                 if (selectedRow >= 0) {
-                    Long parkingLotId = (Long) parkingLotsTable.getValueAt(selectedRow, 0);
-                    try {
-                        makeReservation(parkingLotId);
-                    } catch (IOException ioException) {
-                        ioException.printStackTrace();
-                        JOptionPane.showMessageDialog(panel, "Failed to create reservation");
+                    Long parkingLotId = ((ParkingLotTableModel) parkingLotsTable.getModel()).getParkingLotId(selectedRow); // Get ID from model
+                    int response = JOptionPane.showConfirmDialog(panel, "Are you sure you want to reserve this parking lot?", "Confirm Reservation", JOptionPane.YES_NO_OPTION);
+                    if (response == JOptionPane.YES_OPTION) {
+                        try {
+                            makeReservation(parkingLotId);
+                        } catch (IOException ioException) {
+                            ioException.printStackTrace();
+                            JOptionPane.showMessageDialog(panel, "Failed to create reservation");
+                        }
                     }
                 } else {
                     JOptionPane.showMessageDialog(panel, "Please select a parking lot to reserve");
                 }
+            }
+        });
+
+        logoutButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Handle logout logic (e.g., navigate to login panel)
+                JOptionPane.showMessageDialog(panel, "Logged out successfully");
+                JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(panel);
+                topFrame.setContentPane(new LoginPanel(topFrame).getPanel());
+                topFrame.revalidate();
             }
         });
 
@@ -83,8 +107,8 @@ public class UserPanel {
             try (CloseableHttpResponse response = client.execute(get)) {
                 String responseString = EntityUtils.toString(response.getEntity());
                 ObjectMapper mapper = new ObjectMapper();
-                mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);  // Ignore unknown properties
-                List<ParkingLotDTO> parkingLots = mapper.readValue(responseString, new TypeReference<List<ParkingLotDTO>>() {});
+                List<ParkingLotDTO> parkingLots = mapper.readValue(responseString,
+                        mapper.getTypeFactory().constructCollectionType(List.class, ParkingLotDTO.class));
                 parkingLotsTable.setModel(new ParkingLotTableModel(parkingLots));
             }
         }
@@ -111,7 +135,7 @@ public class UserPanel {
     }
 
     class ParkingLotTableModel extends AbstractTableModel {
-        private final String[] columnNames = {"ID", "Name", "Address", "Capacity", "Available Spaces"};
+        private final String[] columnNames = {"Name", "Address", "Capacity", "Available Spaces"};
         private final List<ParkingLotDTO> parkingLots;
 
         public ParkingLotTableModel(List<ParkingLotDTO> parkingLots) {
@@ -138,18 +162,20 @@ public class UserPanel {
             ParkingLotDTO parkingLot = parkingLots.get(rowIndex);
             switch (columnIndex) {
                 case 0:
-                    return parkingLot.getId();
-                case 1:
                     return parkingLot.getName();
-                case 2:
+                case 1:
                     return parkingLot.getAddress();
-                case 3:
+                case 2:
                     return parkingLot.getCapacity();
-                case 4:
+                case 3:
                     return parkingLot.getAvailableSpaces();
                 default:
                     return null;
             }
+        }
+
+        public Long getParkingLotId(int rowIndex) {
+            return parkingLots.get(rowIndex).getId();
         }
     }
 }

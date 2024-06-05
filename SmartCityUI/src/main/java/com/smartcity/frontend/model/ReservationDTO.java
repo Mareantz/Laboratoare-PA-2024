@@ -6,7 +6,6 @@ public class ReservationDTO {
     private Long reservationId;
     private LocalDateTime reservedAt;
 
-    // Getters and Setters
     public Long getReservationId() {
         return reservationId;
     }

@@ -116,7 +116,6 @@ public class RegisterPanel {
         }
     }
 
-    // DTO class for user registration
     static class UserRegistrationDTO {
         private String username;
         private String password;

@@ -8,10 +8,8 @@ public class ParkingLot {
     private String address;
     private int capacity;
     private int availableSpaces;
-    private List<ParkingSpace> parkingSpaces; // Add this line
-    private List<Reservation> reservations;   // Add this line
-
-    // Getters and setters
+    private List<ParkingSpace> parkingSpaces;
+    private List<Reservation> reservations;
 
     public Long getParkingLotId() {
         return parkingLotId;

@@ -1,5 +1,8 @@
 package com.smartcity.frontend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ParkingLotDTO {
     private Long id;
     private String name;
@@ -7,7 +10,6 @@ public class ParkingLotDTO {
     private int capacity;
     private int availableSpaces;
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

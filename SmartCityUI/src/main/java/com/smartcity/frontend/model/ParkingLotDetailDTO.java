@@ -6,7 +6,6 @@ public class ParkingLotDetailDTO extends ParkingLotDTO {
     private List<ParkingSpaceDTO> parkingSpaces;
     private List<ReservationDTO> reservations;
 
-    // Getters and Setters
     public List<ParkingSpaceDTO> getParkingSpaces() {
         return parkingSpaces;
     }
