@@ -1,5 +1,13 @@
 package com.smartcity.parkingmanager.controller;
 
+import com.smartcity.parkingmanager.dto.UserRegistrationDTO;
+import com.smartcity.parkingmanager.dto.UserDetailDTO;
+import com.smartcity.parkingmanager.dto.UserDTO;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import com.smartcity.parkingmanager.mapper.UserMapper;
 import com.smartcity.parkingmanager.model.User;
 import com.smartcity.parkingmanager.model.UserRole;
 import com.smartcity.parkingmanager.service.UserService;
@@ -12,8 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
@@ -26,37 +33,47 @@ public class UserController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserMapper userMapper;
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody User user) {
+    public ResponseEntity<?> registerUser(@RequestBody UserRegistrationDTO userRegistrationDTO) {
+        User user = userMapper.toUser(userRegistrationDTO);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRole(UserRole.USER); // Or UserRole.ADMIN for admin users
         userService.saveUser(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
+        UserDTO userDTO = userMapper.toUserDTO(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userDTO);
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody User user) {
         Optional<User> existingUser = userService.findByUsername(user.getUsername());
         if (existingUser.isPresent() && passwordEncoder.matches(user.getPassword(), existingUser.get().getPassword())) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "Login successful");
-            response.put("userId", existingUser.get().getUserId());
-            response.put("username", existingUser.get().getUsername());
-            return ResponseEntity.ok(response);
+            UserDTO userDTO = userMapper.toUserDTO(existingUser.get());
+            return ResponseEntity.ok(userDTO);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
     }
 
     @GetMapping
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
+    public List<UserDetailDTO> getAllUsers() {
+        List<User> users = userService.getAllUsers();
+        return users.stream()
+                .map(userMapper::toUserDetailDTO)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable Long id) {
-        return userService.getUserById(id);
+    public ResponseEntity<?> getUserById(@PathVariable Long id) {
+        User user = userService.getUserById(id);
+        if (user != null) {
+            UserDetailDTO userDetailDTO = userMapper.toUserDetailDTO(user);
+            return ResponseEntity.ok(userDetailDTO);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
     }
 
     @PostMapping

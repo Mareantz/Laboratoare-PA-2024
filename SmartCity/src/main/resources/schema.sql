@@ -18,7 +18,8 @@ CREATE TABLE IF NOT EXISTS reservations (
                               user_id BIGINT NOT NULL,
                               parking_lot_id BIGINT NOT NULL,
                               parking_space_id BIGINT,
-                              reserved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                              start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                              end_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                               FOREIGN KEY (user_id) REFERENCES users(user_id),
                               FOREIGN KEY (parking_lot_id) REFERENCES parking_lots(parking_lot_id),
                               FOREIGN KEY (parking_space_id) REFERENCES parking_spaces(parking_space_id)

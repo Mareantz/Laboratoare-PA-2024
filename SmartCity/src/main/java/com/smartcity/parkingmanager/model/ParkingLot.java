@@ -1,5 +1,8 @@
 package com.smartcity.parkingmanager.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -25,9 +28,11 @@ public class ParkingLot {
     private int availableSpaces;
 
     @OneToMany(mappedBy = "parkingLot", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<ParkingSpace> parkingSpaces;
 
     @OneToMany(mappedBy = "parkingLot", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Reservation> reservations;
 
     // Getters and Setters
