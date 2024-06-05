@@ -15,11 +15,11 @@ public class ParkingSpace {
 
     @ManyToOne
     @JoinColumn(name = "parking_lot_id", nullable = false)
-    @JsonBackReference
+    @JsonBackReference(value="parkingLot-parkingSpaces")
     private ParkingLot parkingLot;
 
     @OneToMany(mappedBy = "parkingSpace", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonManagedReference(value="parkingSpace-reservations")
     private Set<Reservation> reservations = new HashSet<>();
 
     private boolean isReserved;

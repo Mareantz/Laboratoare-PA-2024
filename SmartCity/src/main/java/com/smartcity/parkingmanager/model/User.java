@@ -24,7 +24,7 @@ public class User {
     private UserRole role;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonManagedReference(value = "user-reservations")
     private List<Reservation> reservations;
 
     // Getters and Setters

@@ -26,11 +26,11 @@ public class ParkingLot {
     private int availableSpaces;
 
     @OneToMany(mappedBy = "parkingLot", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonManagedReference(value="parkingLot-parkingSpaces")
     private List<ParkingSpace> parkingSpaces;
 
     @OneToMany(mappedBy = "parkingLot", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonManagedReference(value="parkingLot-reservations")
     private List<Reservation> reservations;
 
     // Getters and Setters

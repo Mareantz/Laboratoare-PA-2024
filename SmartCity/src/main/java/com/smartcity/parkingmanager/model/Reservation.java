@@ -14,17 +14,17 @@ public class Reservation {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonBackReference
+    @JsonBackReference(value = "user-reservations")
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "parking_lot_id", nullable = false)
-    @JsonBackReference
+    @JsonBackReference(value="parkingLot-reservations")
     private ParkingLot parkingLot;
 
     @ManyToOne
     @JoinColumn(name = "parking_space_id", nullable = false)
-    @JsonBackReference
+    @JsonBackReference(value="parkingSpace-reservations")
     private ParkingSpace parkingSpace;
 
     private LocalDateTime startTime;
