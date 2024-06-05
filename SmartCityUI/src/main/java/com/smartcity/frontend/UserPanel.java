@@ -1,7 +1,9 @@
 package com.smartcity.frontend;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.smartcity.frontend.model.ParkingLot;
+import com.smartcity.frontend.model.ParkingLotDTO;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -81,8 +83,8 @@ public class UserPanel {
             try (CloseableHttpResponse response = client.execute(get)) {
                 String responseString = EntityUtils.toString(response.getEntity());
                 ObjectMapper mapper = new ObjectMapper();
-                List<ParkingLot> parkingLots = mapper.readValue(responseString,
-                        mapper.getTypeFactory().constructCollectionType(List.class, ParkingLot.class));
+                mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);  // Ignore unknown properties
+                List<ParkingLotDTO> parkingLots = mapper.readValue(responseString, new TypeReference<List<ParkingLotDTO>>() {});
                 parkingLotsTable.setModel(new ParkingLotTableModel(parkingLots));
             }
         }
@@ -110,9 +112,9 @@ public class UserPanel {
 
     class ParkingLotTableModel extends AbstractTableModel {
         private final String[] columnNames = {"ID", "Name", "Address", "Capacity", "Available Spaces"};
-        private final List<ParkingLot> parkingLots;
+        private final List<ParkingLotDTO> parkingLots;
 
-        public ParkingLotTableModel(List<ParkingLot> parkingLots) {
+        public ParkingLotTableModel(List<ParkingLotDTO> parkingLots) {
             this.parkingLots = parkingLots;
         }
 
@@ -133,10 +135,10 @@ public class UserPanel {
 
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-            ParkingLot parkingLot = parkingLots.get(rowIndex);
+            ParkingLotDTO parkingLot = parkingLots.get(rowIndex);
             switch (columnIndex) {
                 case 0:
-                    return parkingLot.getParkingLotId();
+                    return parkingLot.getId();
                 case 1:
                     return parkingLot.getName();
                 case 2:

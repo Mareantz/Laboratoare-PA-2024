@@ -94,7 +94,9 @@ public class RegisterPanel {
 
     private void register(String username, String password, String email) throws IOException {
         String url = "http://localhost:8081/api/users/register";
-        String json = "{\"username\":\"" + username + "\",\"password\":\"" + password + "\",\"email\":\"" + email + "\"}";
+        ObjectMapper mapper = new ObjectMapper();
+        UserRegistrationDTO userRegistrationDTO = new UserRegistrationDTO(username, password, email);
+        String json = mapper.writeValueAsString(userRegistrationDTO);
 
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             HttpPost post = new HttpPost(url);
@@ -111,6 +113,45 @@ public class RegisterPanel {
                     JOptionPane.showMessageDialog(panel, "Registration failed");
                 }
             }
+        }
+    }
+
+    // DTO class for user registration
+    static class UserRegistrationDTO {
+        private String username;
+        private String password;
+        private String email;
+
+        public UserRegistrationDTO() {}
+
+        public UserRegistrationDTO(String username, String password, String email) {
+            this.username = username;
+            this.password = password;
+            this.email = email;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
         }
     }
 }

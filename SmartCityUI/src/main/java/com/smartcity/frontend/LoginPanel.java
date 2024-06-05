@@ -1,118 +1,202 @@
 package com.smartcity.frontend;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Scanner;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class LoginPanel {
-    private JPanel panel;
+public class LoginPanel extends JPanel {
     private JTextField usernameField;
     private JPasswordField passwordField;
     private JButton loginButton;
-    private JButton registerButton;
-    private JFrame parentFrame;
+    private JLabel statusLabel;
+    private JFrame frame;
 
-    public LoginPanel(JFrame parentFrame) {
-        this.parentFrame = parentFrame;
+    public LoginPanel(JFrame frame) {
+        this.frame = frame;
         initializeComponents();
+        addComponentsToPanel();
+        addListeners();
     }
 
     private void initializeComponents() {
-        panel = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
+        usernameField = new JTextField(20);
+        passwordField = new JPasswordField(20);
+        loginButton = new JButton("Login");
+        statusLabel = new JLabel();
+    }
 
-        JLabel usernameLabel = new JLabel("Username:");
+    private void addComponentsToPanel() {
+        setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
         gbc.gridx = 0;
         gbc.gridy = 0;
-        panel.add(usernameLabel, gbc);
-
-        usernameField = new JTextField(20);
+        add(new JLabel("Username:"), gbc);
         gbc.gridx = 1;
-        panel.add(usernameField, gbc);
-
-        JLabel passwordLabel = new JLabel("Password:");
+        add(usernameField, gbc);
         gbc.gridx = 0;
         gbc.gridy = 1;
-        panel.add(passwordLabel, gbc);
-
-        passwordField = new JPasswordField(20);
+        add(new JLabel("Password:"), gbc);
         gbc.gridx = 1;
-        panel.add(passwordField, gbc);
-
-        loginButton = new JButton("Login");
-        gbc.gridx = 0;
+        add(passwordField, gbc);
         gbc.gridy = 2;
-        gbc.gridwidth = 2;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        panel.add(loginButton, gbc);
-
-        registerButton = new JButton("Register");
+        add(loginButton, gbc);
+        gbc.gridx = 0;
         gbc.gridy = 3;
-        panel.add(registerButton, gbc);
+        gbc.gridwidth = 2;
+        add(statusLabel, gbc);
+    }
 
+    private void addListeners() {
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    String username = usernameField.getText();
-                    String password = new String(passwordField.getPassword());
-                    login(username, password);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    JOptionPane.showMessageDialog(panel, "Login failed");
+                String username = usernameField.getText();
+                String password = new String(passwordField.getPassword());
+
+                // Send login request to the server
+                boolean loginSuccessful = sendLoginRequest(username, password);
+
+                if (loginSuccessful) {
+                    statusLabel.setText("Login successful!");
+                } else {
+                    statusLabel.setText("Invalid credentials");
                 }
             }
         });
+    }
 
-        registerButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                parentFrame.setContentPane(new RegisterPanel(parentFrame).getPanel());
-                parentFrame.validate();
+    private boolean sendLoginRequest(String username, String password) {
+        try {
+            // Create the URL object for the login endpoint
+            URL url = new URL("http://localhost:8081/api/users/login");
+
+            // Open connection
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type", "application/json; utf-8");
+            connection.setRequestProperty("Accept", "application/json");
+            connection.setDoOutput(true);
+
+            // Create JSON payload
+            ObjectMapper mapper = new ObjectMapper();
+            UserLoginDTO userLoginDTO = new UserLoginDTO(username, password);
+            String jsonInputString = mapper.writeValueAsString(userLoginDTO);
+
+            // Send the request
+            try (OutputStream os = connection.getOutputStream()) {
+                byte[] input = jsonInputString.getBytes("utf-8");
+                os.write(input, 0, input.length);
             }
-        });
+
+            // Read the response
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                try (Scanner scanner = new Scanner(connection.getInputStream())) {
+                    String responseBody = scanner.useDelimiter("\\A").next();
+                    UserDTO userDTO = mapper.readValue(responseBody, UserDTO.class);
+
+                    // Handle successful login, e.g., switch to user panel
+                    frame.setContentPane(new UserPanel(userDTO.getId(), userDTO.getUsername()).getPanel());
+                    frame.revalidate();
+
+                    return true;
+                }
+            } else {
+                return false;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public JPanel getPanel() {
-        return panel;
+        return this;
     }
 
-    private void login(String username, String password) throws IOException {
-        String url = "http://localhost:8081/api/users/login";
-        String json = "{\"username\":\"" + username + "\",\"password\":\"" + password + "\"}";
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Login");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setContentPane(new LoginPanel(frame));
+        frame.pack();
+        frame.setVisible(true);
+    }
 
-        try (CloseableHttpClient client = HttpClients.createDefault()) {
-            HttpPost post = new HttpPost(url);
-            post.setHeader("Content-type", "application/json");
-            post.setEntity(new StringEntity(json));
+    // DTO classes
+    public static class UserLoginDTO {
+        private String username;
+        private String password;
 
-            try (CloseableHttpResponse response = client.execute(post)) {
-                String responseString = EntityUtils.toString(response.getEntity());
-                ObjectMapper mapper = new ObjectMapper();
-                JsonNode responseJson = mapper.readTree(responseString);
+        public UserLoginDTO() {}
 
-                if (responseJson.has("message") && responseJson.get("message").asText().equals("Login successful")) {
-                    Long userId = responseJson.get("userId").asLong();
-                    String usernameResponse = responseJson.get("username").asText();
-                    JOptionPane.showMessageDialog(panel, "Login successful");
-                    parentFrame.setContentPane(new UserPanel(userId, usernameResponse).getPanel());
-                    parentFrame.validate();
-                } else {
-                    JOptionPane.showMessageDialog(panel, "Invalid credentials");
-                }
-            }
+        public UserLoginDTO(String username, String password) {
+            this.username = username;
+            this.password = password;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+    }
+
+    public static class UserDTO {
+        private Long id;
+        private String username;
+        private String email;
+        private String role;
+
+        public UserDTO() {}
+
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public String getRole() {
+            return role;
+        }
+
+        public void setRole(String role) {
+            this.role = role;
         }
     }
 }
