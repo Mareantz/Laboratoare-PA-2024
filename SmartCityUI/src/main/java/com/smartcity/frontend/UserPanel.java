@@ -3,21 +3,25 @@ package com.smartcity.frontend;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smartcity.frontend.model.ParkingLotDTO;
 import com.smartcity.frontend.model.ParkingLotDetailDTO;
-import com.smartcity.frontend.model.ParkingSpaceDTO;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.AbstractTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class UserPanel {
@@ -26,15 +30,21 @@ public class UserPanel {
     private JButton reserveButton;
     private JButton viewLayoutButton;
     private JButton logoutButton;
+    private JButton extendReservationButton;
+    private JButton cancelReservationButton;
     private JLabel welcomeLabel;
     private Long userId;
     private String username;
     private List<ParkingLotDTO> parkingLots;
+    private Long activeReservationId;
+    private Long activeParkingSpaceId;
+    private Timer refreshTimer;
 
     public UserPanel(Long userId, String username) {
         this.userId = userId;
         this.username = username;
         initializeComponents();
+        startRefreshTimer();
     }
 
     private void initializeComponents() {
@@ -45,6 +55,8 @@ public class UserPanel {
         reserveButton = new JButton("Reserve");
         viewLayoutButton = new JButton("View Layout");
         logoutButton = new JButton("Logout");
+        extendReservationButton = new JButton("Extend Reservation");
+        cancelReservationButton = new JButton("Cancel Reservation");
         welcomeLabel = new JLabel("Welcome, " + username);
 
         JPanel topPanel = new JPanel(new BorderLayout());
@@ -54,6 +66,11 @@ public class UserPanel {
         buttonPanel.add(reserveButton);
         buttonPanel.add(viewLayoutButton);
         buttonPanel.add(logoutButton);
+        buttonPanel.add(extendReservationButton);
+        buttonPanel.add(cancelReservationButton);
+        extendReservationButton.setVisible(false);
+        cancelReservationButton.setVisible(false);
+
 
         panel.add(topPanel, BorderLayout.NORTH);
         panel.add(new JScrollPane(parkingLotsTable), BorderLayout.CENTER);
@@ -69,7 +86,7 @@ public class UserPanel {
                     if (response == JOptionPane.YES_OPTION) {
                         try {
                             makeReservation(parkingLotId);
-                            loadParkingLots();
+                            loadParkingLotsAndReservations();
                         } catch (IOException ioException) {
                             ioException.printStackTrace();
                             JOptionPane.showMessageDialog(panel, "Failed to create reservation");
@@ -109,8 +126,27 @@ public class UserPanel {
             }
         });
 
+        extendReservationButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showExtendOptions();
+            }
+        });
+
+        cancelReservationButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    cancelReservation();
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                    JOptionPane.showMessageDialog(panel, "Failed to cancel reservation");
+                }
+            }
+        });
+
         try {
-            loadParkingLots();
+            loadParkingLotsAndReservations();
         } catch (IOException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(panel, "Failed to load parking lots");
@@ -121,18 +157,27 @@ public class UserPanel {
         return panel;
     }
 
-    private void loadParkingLots() throws IOException {
-        String url = "http://localhost:8081/api/parking-lots";
+    private void loadParkingLotsAndReservations() throws IOException {
+        String parkingLotsUrl = "http://localhost:8081/api/parking-lots";
+        String reservationsUrl = "http://localhost:8081/api/reservations";
 
         try (CloseableHttpClient client = HttpClients.createDefault()) {
-            HttpGet get = new HttpGet(url);
-            get.setHeader("Content-type", "application/json");
-
-            try (CloseableHttpResponse response = client.execute(get)) {
-                String responseString = EntityUtils.toString(response.getEntity());
+            // Load parking lots
+            HttpGet getParkingLots = new HttpGet(parkingLotsUrl);
+            getParkingLots.setHeader("Content-type", "application/json");
+            try (CloseableHttpResponse parkingLotsResponse = client.execute(getParkingLots)) {
+                String parkingLotsResponseString = EntityUtils.toString(parkingLotsResponse.getEntity());
                 ObjectMapper mapper = new ObjectMapper();
-                parkingLots = mapper.readValue(responseString, mapper.getTypeFactory().constructCollectionType(List.class, ParkingLotDTO.class));
+                parkingLots = mapper.readValue(parkingLotsResponseString, mapper.getTypeFactory().constructCollectionType(List.class, ParkingLotDTO.class));
                 parkingLotsTable.setModel(new ParkingLotTableModel(parkingLots));
+            }
+
+            // Load reservations
+            HttpGet getReservations = new HttpGet(reservationsUrl);
+            getReservations.setHeader("Content-type", "application/json");
+            try (CloseableHttpResponse reservationsResponse = client.execute(getReservations)) {
+                String reservationsResponseString = EntityUtils.toString(reservationsResponse.getEntity());
+                updateReservationsTable(reservationsResponseString);
             }
         }
     }
@@ -157,6 +202,26 @@ public class UserPanel {
         }
     }
 
+    private void cancelReservation() throws IOException {
+        String url = "http://localhost:8081/api/reservations/" + activeReservationId;
+
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            HttpDelete delete = new HttpDelete(url);
+            delete.setHeader("Content-type", "application/json");
+
+            try (CloseableHttpResponse response = client.execute(delete)) {
+                String responseString = EntityUtils.toString(response.getEntity());
+                if (responseString.contains("Reservation canceled successfully")) {
+                    JOptionPane.showMessageDialog(panel, "Reservation canceled successfully");
+                    loadParkingLotsAndReservations(); // Refresh the tables
+                } else {
+                    JOptionPane.showMessageDialog(panel, "Failed to cancel reservation: " + responseString);
+                }
+            }
+        }
+    }
+
+
     private void viewParkingLotLayout(Long parkingLotId) throws IOException {
         String url = "http://localhost:8081/api/parking-lots/" + parkingLotId;
 
@@ -171,17 +236,119 @@ public class UserPanel {
 
                 JFrame layoutFrame = new JFrame("Parking Lot Layout - " + parkingLotDetail.getName());
                 layoutFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                layoutFrame.setSize(600, 600);
+                layoutFrame.setSize(1024, 768);
 
-                // Assuming the user has only one reservation at a time, find the reserved space ID
-                Long reservedSpaceId = null;
-                // Find reserved space ID here if needed, currently it's null
+                Long reservedSpaceId = activeParkingSpaceId;
+                System.out.println("Reserved Space ID: " + reservedSpaceId);
 
                 ParkingLotLayoutPanel layoutPanel = new ParkingLotLayoutPanel(parkingLotDetail.getParkingSpaces(), reservedSpaceId);
+
+                layoutFrame.setLocationRelativeTo(null);
                 layoutFrame.setContentPane(layoutPanel);
                 layoutFrame.setVisible(true);
             }
         }
+    }
+
+    private void showExtendOptions() {
+        String[] options = {"30 minutes", "1 hour"};
+        int choice = JOptionPane.showOptionDialog(panel, "Extend reservation by:", "Extend Reservation",
+                JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+
+        if (choice == 0) {
+            try {
+                extendReservation(30);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        } else if (choice == 1) {
+            try {
+                extendReservation(60);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    private void extendReservation(int minutes) throws IOException {
+        String url = "http://localhost:8081/api/reservations/extend";
+        String json = "{\"reservationId\":" + activeReservationId + ",\"minutes\":" + minutes + "}";
+
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            HttpPost post = new HttpPost(url);
+            post.setHeader("Content-type", "application/json");
+            post.setEntity(new StringEntity(json));
+
+            try (CloseableHttpResponse response = client.execute(post)) {
+                String responseString = EntityUtils.toString(response.getEntity());
+                if (responseString.contains("Reservation extended successfully")) {
+                    JOptionPane.showMessageDialog(panel, "Reservation extended successfully");
+                    loadParkingLotsAndReservations(); // Refresh the tables
+                } else {
+                    JOptionPane.showMessageDialog(panel, "Failed to extend reservation: " + responseString);
+                }
+            }
+        }
+    }
+
+    private void updateReservationsTable(String jsonResponse) {
+        try {
+            JSONArray reservations = new JSONArray(jsonResponse);
+            String[] columnNames = {"Reservation ID", "User ID", "Parking Lot ID", "Parking Space ID", "Start Time", "End Time"};
+            DefaultTableModel model = new DefaultTableModel(columnNames, 0);
+            activeReservationId = null;
+            activeParkingSpaceId = null;
+
+            for (int i = 0; i < reservations.length(); i++) {
+                JSONObject reservation = reservations.getJSONObject(i);
+                Long reservationId = reservation.getLong("reservationId");
+                Long userId = reservation.has("userId") ? reservation.getLong("userId") : null;
+                Long parkingLotId = reservation.has("parkingLotId") ? reservation.getLong("parkingLotId") : null;
+                Long parkingSpaceId = reservation.has("parkingSpaceId") ? reservation.getLong("parkingSpaceId") : null;
+                String startTime = reservation.getString("startTime");
+                String endTime = reservation.getString("endTime");
+
+                Object[] row = {reservationId, userId, parkingLotId, parkingSpaceId, startTime, endTime};
+                model.addRow(row);
+
+                if (userId != null && userId.equals(this.userId) && LocalDateTime.parse(endTime).isAfter(LocalDateTime.now())) {
+                    activeReservationId = reservationId;
+                    activeParkingSpaceId = parkingSpaceId;
+                }
+            }
+
+            updateExtendButtonVisibility();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void startRefreshTimer() {
+        int delay = 10000; // 10 seconds delay
+        refreshTimer = new Timer(delay, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    loadParkingLotsAndReservations(); // Periodically refresh the data
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+            }
+        });
+        refreshTimer.start();
+    }
+
+    private void updateExtendButtonVisibility() {
+        if (activeReservationId != null) {
+            extendReservationButton.setVisible(true);
+            cancelReservationButton.setVisible(true);
+        } else {
+            extendReservationButton.setVisible(false);
+            cancelReservationButton.setVisible(false);
+        }
+        panel.revalidate();
+        panel.repaint();
     }
 
     class ParkingLotTableModel extends AbstractTableModel {

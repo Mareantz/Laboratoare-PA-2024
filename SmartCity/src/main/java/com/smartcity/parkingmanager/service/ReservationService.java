@@ -35,19 +35,28 @@ public class ReservationService {
 
     @Transactional
     public void createReservation(Long userId, Long parkingLotId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
-        ParkingLot parkingLot = parkingLotRepository.findById(parkingLotId).orElseThrow(() -> new IllegalArgumentException("Invalid parking lot ID"));
-        ParkingSpace parkingSpace = parkingSpaceRepository.findFirstByParkingLotParkingLotIdAndIsReservedFalse(parkingLotId).orElseThrow(() -> new IllegalArgumentException("Invalid parking space ID"));
+        if (reservationRepository.existsByUserUserIdAndEndTimeAfter(userId, LocalDateTime.now())) {
+            throw new IllegalArgumentException("User already has an active reservation");
+        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+        ParkingLot parkingLot = parkingLotRepository.findById(parkingLotId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid parking lot ID"));
+        ParkingSpace parkingSpace = parkingSpaceRepository.findFirstByParkingLotParkingLotIdAndIsReservedFalse(parkingLotId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid parking space ID"));
         parkingSpace.setReserved(true);
+
         Reservation reservation = new Reservation();
         reservation.setUser(user);
         reservation.setParkingLot(parkingLot);
         reservation.setParkingSpace(parkingSpace);
         reservation.setStartTime(LocalDateTime.now());
         reservation.setEndTime(LocalDateTime.now().plusHours(1));
+
         reservationRepository.save(reservation);
-        parkingLotService.updateAvailableSpaces(parkingSpace.getParkingLot().getParkingLotId());
+        parkingLotService.updateAvailableSpaces(parkingLotId);
     }
+
 
     @Transactional
     public void cancelReservation(Long reservationId) {
@@ -73,6 +82,16 @@ public class ReservationService {
             parkingLotService.updateAvailableSpaces(lot.getParkingLotId());
         }
     }
+
+    @Transactional
+    public void extendReservation(Long reservationId, int minutes) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid reservation ID"));
+        LocalDateTime newEndTime = reservation.getEndTime().plusMinutes(minutes);
+        reservation.setEndTime(newEndTime);
+        reservationRepository.save(reservation);
+    }
+
 
     public List<Reservation> getALlReservations() {
         return reservationRepository.findAll();

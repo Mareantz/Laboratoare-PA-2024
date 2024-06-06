@@ -35,7 +35,10 @@ public class UserMapper {
 
     public ReservationDTO toReservationDTO(Reservation reservation) {
         ReservationDTO dto = new ReservationDTO();
-        dto.setId(reservation.getReservationId());
+        dto.setReservationId(reservation.getReservationId());
+        dto.setUserId(reservation.getUser().getUserId());
+        dto.setParkingLotId(reservation.getParkingLot().getParkingLotId());
+        dto.setParkingSpaceId(reservation.getParkingSpace().getParkingSpaceId());
         dto.setStartTime(reservation.getStartTime());
         dto.setEndTime(reservation.getEndTime());
         return dto;
