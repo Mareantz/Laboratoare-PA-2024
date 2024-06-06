@@ -28,7 +28,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/users/register", "/api/users/login").permitAll()
                         .requestMatchers("/api/parking-lots/**","/api/reservations/**").permitAll()
-                        .requestMatchers("/api/users/**").hasRole("ADMIN") // Ensure correct role check
+                        .requestMatchers("/api/users/**","/api/admin/clearReservations").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .httpBasic(); // Use HTTP Basic authentication
 

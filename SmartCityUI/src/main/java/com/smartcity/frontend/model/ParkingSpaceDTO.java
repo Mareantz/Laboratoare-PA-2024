@@ -1,15 +1,20 @@
 package com.smartcity.frontend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true) // This will ignore any unknown properties in the JSON response
 public class ParkingSpaceDTO {
-    private Long parkingSpaceId;
+    private Long id;
     private boolean reserved;
 
-    public Long getParkingSpaceId() {
-        return parkingSpaceId;
+    // Getters and setters
+
+    public Long getId() {
+        return id;
     }
 
-    public void setParkingSpaceId(Long parkingSpaceId) {
-        this.parkingSpaceId = parkingSpaceId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public boolean isReserved() {

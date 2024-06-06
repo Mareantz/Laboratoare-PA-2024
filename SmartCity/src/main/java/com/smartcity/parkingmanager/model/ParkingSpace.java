@@ -53,7 +53,7 @@ public class ParkingSpace {
         return isReserved;
     }
 
-    public void setAvailable(boolean available) {
+    public void setReserved(boolean available) {
         isReserved = available;
     }
 }

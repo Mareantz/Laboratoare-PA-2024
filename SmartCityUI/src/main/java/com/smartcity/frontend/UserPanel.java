@@ -2,6 +2,8 @@ package com.smartcity.frontend;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smartcity.frontend.model.ParkingLotDTO;
+import com.smartcity.frontend.model.ParkingLotDetailDTO;
+import com.smartcity.frontend.model.ParkingSpaceDTO;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -22,10 +24,12 @@ public class UserPanel {
     private JPanel panel;
     private JTable parkingLotsTable;
     private JButton reserveButton;
+    private JButton viewLayoutButton;
     private JButton logoutButton;
-    private JLabel welcomeLabel; // Add welcome label
+    private JLabel welcomeLabel;
     private Long userId;
     private String username;
+    private List<ParkingLotDTO> parkingLots;
 
     public UserPanel(Long userId, String username) {
         this.userId = userId;
@@ -39,17 +43,19 @@ public class UserPanel {
 
         parkingLotsTable = new JTable();
         reserveButton = new JButton("Reserve");
+        viewLayoutButton = new JButton("View Layout");
         logoutButton = new JButton("Logout");
-        welcomeLabel = new JLabel("Welcome, " + username); // Initialize welcome label
+        welcomeLabel = new JLabel("Welcome, " + username);
 
         JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.add(welcomeLabel, BorderLayout.WEST); // Add welcome label to top panel
+        topPanel.add(welcomeLabel, BorderLayout.WEST);
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.add(reserveButton);
+        buttonPanel.add(viewLayoutButton);
         buttonPanel.add(logoutButton);
 
-        panel.add(topPanel, BorderLayout.NORTH); // Add top panel to main panel
+        panel.add(topPanel, BorderLayout.NORTH);
         panel.add(new JScrollPane(parkingLotsTable), BorderLayout.CENTER);
         panel.add(buttonPanel, BorderLayout.SOUTH);
 
@@ -58,11 +64,12 @@ public class UserPanel {
             public void actionPerformed(ActionEvent e) {
                 int selectedRow = parkingLotsTable.getSelectedRow();
                 if (selectedRow >= 0) {
-                    Long parkingLotId = ((ParkingLotTableModel) parkingLotsTable.getModel()).getParkingLotId(selectedRow); // Get ID from model
+                    Long parkingLotId = ((ParkingLotTableModel) parkingLotsTable.getModel()).getParkingLotId(selectedRow);
                     int response = JOptionPane.showConfirmDialog(panel, "Are you sure you want to reserve this parking lot?", "Confirm Reservation", JOptionPane.YES_NO_OPTION);
                     if (response == JOptionPane.YES_OPTION) {
                         try {
                             makeReservation(parkingLotId);
+                            loadParkingLots();
                         } catch (IOException ioException) {
                             ioException.printStackTrace();
                             JOptionPane.showMessageDialog(panel, "Failed to create reservation");
@@ -74,10 +81,27 @@ public class UserPanel {
             }
         });
 
+        viewLayoutButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int selectedRow = parkingLotsTable.getSelectedRow();
+                if (selectedRow >= 0) {
+                    Long parkingLotId = ((ParkingLotTableModel) parkingLotsTable.getModel()).getParkingLotId(selectedRow);
+                    try {
+                        viewParkingLotLayout(parkingLotId);
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                        JOptionPane.showMessageDialog(panel, "Failed to load parking lot layout");
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(panel, "Please select a parking lot to view its layout");
+                }
+            }
+        });
+
         logoutButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Handle logout logic (e.g., navigate to login panel)
                 JOptionPane.showMessageDialog(panel, "Logged out successfully");
                 JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(panel);
                 topFrame.setContentPane(new LoginPanel(topFrame).getPanel());
@@ -107,8 +131,7 @@ public class UserPanel {
             try (CloseableHttpResponse response = client.execute(get)) {
                 String responseString = EntityUtils.toString(response.getEntity());
                 ObjectMapper mapper = new ObjectMapper();
-                List<ParkingLotDTO> parkingLots = mapper.readValue(responseString,
-                        mapper.getTypeFactory().constructCollectionType(List.class, ParkingLotDTO.class));
+                parkingLots = mapper.readValue(responseString, mapper.getTypeFactory().constructCollectionType(List.class, ParkingLotDTO.class));
                 parkingLotsTable.setModel(new ParkingLotTableModel(parkingLots));
             }
         }
@@ -130,6 +153,33 @@ public class UserPanel {
                 } else {
                     JOptionPane.showMessageDialog(panel, "Failed to create reservation: " + responseString);
                 }
+            }
+        }
+    }
+
+    private void viewParkingLotLayout(Long parkingLotId) throws IOException {
+        String url = "http://localhost:8081/api/parking-lots/" + parkingLotId;
+
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            HttpGet get = new HttpGet(url);
+            get.setHeader("Content-type", "application/json");
+
+            try (CloseableHttpResponse response = client.execute(get)) {
+                String responseString = EntityUtils.toString(response.getEntity());
+                ObjectMapper mapper = new ObjectMapper();
+                ParkingLotDetailDTO parkingLotDetail = mapper.readValue(responseString, ParkingLotDetailDTO.class);
+
+                JFrame layoutFrame = new JFrame("Parking Lot Layout - " + parkingLotDetail.getName());
+                layoutFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                layoutFrame.setSize(600, 600);
+
+                // Assuming the user has only one reservation at a time, find the reserved space ID
+                Long reservedSpaceId = null;
+                // Find reserved space ID here if needed, currently it's null
+
+                ParkingLotLayoutPanel layoutPanel = new ParkingLotLayoutPanel(parkingLotDetail.getParkingSpaces(), reservedSpaceId);
+                layoutFrame.setContentPane(layoutPanel);
+                layoutFrame.setVisible(true);
             }
         }
     }
