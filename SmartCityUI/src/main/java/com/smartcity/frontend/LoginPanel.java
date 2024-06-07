@@ -1,6 +1,8 @@
 package com.smartcity.frontend;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,7 +13,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Scanner;
 
-public class LoginPanel extends JPanel {
+public class LoginPanel extends JPanel
+{
     private JTextField usernameField;
     private JPasswordField passwordField;
     private JButton loginButton;
@@ -19,14 +22,16 @@ public class LoginPanel extends JPanel {
     private JLabel statusLabel;
     private JFrame frame;
 
-    public LoginPanel(JFrame frame) {
+    public LoginPanel(JFrame frame)
+    {
         this.frame = frame;
         initializeComponents();
         addComponentsToPanel();
         addListeners();
     }
 
-    private void initializeComponents() {
+    private void initializeComponents()
+    {
         usernameField = new JTextField(20);
         passwordField = new JPasswordField(20);
         loginButton = new JButton("Login");
@@ -34,7 +39,8 @@ public class LoginPanel extends JPanel {
         statusLabel = new JLabel();
     }
 
-    private void addComponentsToPanel() {
+    private void addComponentsToPanel()
+    {
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
@@ -62,33 +68,43 @@ public class LoginPanel extends JPanel {
     }
 
 
-    private void addListeners() {
-        loginButton.addActionListener(new ActionListener() {
+    private void addListeners()
+    {
+        loginButton.addActionListener(new ActionListener()
+        {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent e)
+            {
                 String username = usernameField.getText();
                 String password = new String(passwordField.getPassword());
                 boolean loginSuccessful = sendLoginRequest(username, password);
 
-                if (loginSuccessful) {
+                if (loginSuccessful)
+                {
                     statusLabel.setText("Login successful!");
-                } else {
+                }
+                else
+                {
                     statusLabel.setText("Invalid credentials");
                 }
             }
         });
 
-        registerButton.addActionListener(new ActionListener() {
+        registerButton.addActionListener(new ActionListener()
+        {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent e)
+            {
                 frame.setContentPane(new RegisterPanel(frame).getPanel());
                 frame.revalidate();
             }
         });
     }
 
-    private boolean sendLoginRequest(String username, String password) {
-        try {
+    private boolean sendLoginRequest(String username, String password)
+    {
+        try
+        {
             URL url = new URL("http://localhost:8081/api/users/login");
 
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -101,14 +117,17 @@ public class LoginPanel extends JPanel {
             UserLoginDTO userLoginDTO = new UserLoginDTO(username, password);
             String jsonInputString = mapper.writeValueAsString(userLoginDTO);
 
-            try (OutputStream os = connection.getOutputStream()) {
+            try (OutputStream os = connection.getOutputStream())
+            {
                 byte[] input = jsonInputString.getBytes("utf-8");
                 os.write(input, 0, input.length);
             }
 
             int responseCode = connection.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                try (Scanner scanner = new Scanner(connection.getInputStream())) {
+            if (responseCode == HttpURLConnection.HTTP_OK)
+            {
+                try (Scanner scanner = new Scanner(connection.getInputStream()))
+                {
                     String responseBody = scanner.useDelimiter("\\A").next();
                     UserDTO userDTO = mapper.readValue(responseBody, UserDTO.class);
 
@@ -117,21 +136,26 @@ public class LoginPanel extends JPanel {
 
                     return true;
                 }
-            } else {
+            }
+            else
+            {
                 return false;
             }
 
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             e.printStackTrace();
             return false;
         }
     }
 
-    public JPanel getPanel() {
+    public JPanel getPanel()
+    {
         return this;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         JFrame frame = new JFrame("Login");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setContentPane(new LoginPanel(frame));
@@ -139,72 +163,35 @@ public class LoginPanel extends JPanel {
         frame.setVisible(true);
     }
 
-    public static class UserLoginDTO {
+    @Setter
+    @Getter
+    public static class UserLoginDTO
+    {
         private String username;
         private String password;
 
-        public UserLoginDTO() {}
+        public UserLoginDTO()
+        {
+        }
 
-        public UserLoginDTO(String username, String password) {
+        public UserLoginDTO(String username, String password)
+        {
             this.username = username;
-            this.password = password;
-        }
-
-        public String getUsername() {
-            return username;
-        }
-
-        public void setUsername(String username) {
-            this.username = username;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public void setPassword(String password) {
             this.password = password;
         }
     }
 
-    public static class UserDTO {
+    @Setter
+    @Getter
+    public static class UserDTO
+    {
         private Long id;
         private String username;
         private String email;
         private String role;
 
-        public UserDTO() {}
-
-        public Long getId() {
-            return id;
-        }
-
-        public void setId(Long id) {
-            this.id = id;
-        }
-
-        public String getUsername() {
-            return username;
-        }
-
-        public void setUsername(String username) {
-            this.username = username;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
-        public String getRole() {
-            return role;
-        }
-
-        public void setRole(String role) {
-            this.role = role;
+        public UserDTO()
+        {
         }
     }
 }

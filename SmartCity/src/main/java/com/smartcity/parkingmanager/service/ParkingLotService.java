@@ -10,32 +10,37 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-public class ParkingLotService {
-
+public class ParkingLotService
+{
     @Autowired
     private ParkingLotRepository parkingLotRepository;
 
     @Autowired
     private ParkingSpaceRepository parkingSpaceRepository;
 
-    public List<ParkingLot> getAllParkingLots() {
+    public List<ParkingLot> getAllParkingLots()
+    {
         return parkingLotRepository.findAll();
     }
 
-    public ParkingLot saveParkingLot(ParkingLot parkingLot) {
+    public ParkingLot saveParkingLot(ParkingLot parkingLot)
+    {
         return parkingLotRepository.save(parkingLot);
     }
 
-    public ParkingLot getParkingLotById(Long parkingLotId) {
+    public ParkingLot getParkingLotById(Long parkingLotId)
+    {
         return parkingLotRepository.findById(parkingLotId).orElse(null);
     }
 
-    public void deleteParkingLot(Long parkingLotId) {
+    public void deleteParkingLot(Long parkingLotId)
+    {
         parkingLotRepository.deleteById(parkingLotId);
     }
 
     @Transactional
-    public void updateAvailableSpaces(Long parkingLotId) {
+    public void updateAvailableSpaces(Long parkingLotId)
+    {
         ParkingLot parkingLot = parkingLotRepository.findById(parkingLotId).orElseThrow(() -> new IllegalArgumentException("Invalid parking lot ID"));
         int reservedSpaces = parkingSpaceRepository.countByParkingLotParkingLotIdAndIsReserved(parkingLotId, true);
         int availableSpaces = parkingLot.getCapacity() - reservedSpaces;

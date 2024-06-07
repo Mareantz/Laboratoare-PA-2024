@@ -3,7 +3,6 @@ package com.smartcity.parkingmanager.controller;
 import com.smartcity.parkingmanager.model.ParkingLot;
 import com.smartcity.parkingmanager.service.ParkingLotService;
 import com.smartcity.parkingmanager.mapper.ParkingLotMapper;
-import com.smartcity.parkingmanager.dto.ParkingLotDTO;
 import com.smartcity.parkingmanager.dto.ParkingLotDetailDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +19,8 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/parking-lots")
-public class ParkingLotController {
-
+public class ParkingLotController
+{
     @Autowired
     private ParkingLotService parkingLotService;
 
@@ -29,7 +28,8 @@ public class ParkingLotController {
     private ParkingLotMapper parkingLotMapper;
 
     @GetMapping
-    public List<ParkingLotDetailDTO> getAllParkingLots() {
+    public List<ParkingLotDetailDTO> getAllParkingLots()
+    {
         List<ParkingLot> parkingLots = parkingLotService.getAllParkingLots();
         return parkingLots.stream()
                 .map(parkingLotMapper::toParkingLotDetailDTO)
@@ -37,18 +37,23 @@ public class ParkingLotController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getParkingLotById(@PathVariable Long id) {
+    public ResponseEntity<?> getParkingLotById(@PathVariable Long id)
+    {
         ParkingLot parkingLot = parkingLotService.getParkingLotById(id);
-        if (parkingLot != null) {
+        if (parkingLot != null)
+        {
             ParkingLotDetailDTO parkingLotDetailDTO = parkingLotMapper.toParkingLotDetailDTO(parkingLot);
             return ResponseEntity.ok(parkingLotDetailDTO);
-        } else {
+        }
+        else
+        {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Parking lot not found");
         }
     }
 
     @PostMapping
-    public ParkingLot createParkingLot(@RequestBody ParkingLot parkingLot) {
+    public ParkingLot createParkingLot(@RequestBody ParkingLot parkingLot)
+    {
         parkingLot.setAvailableSpaces(parkingLot.getCapacity());
         return parkingLotService.saveParkingLot(parkingLot);
     }

@@ -4,12 +4,11 @@ import org.springframework.stereotype.Service;
 import com.smartcity.parkingmanager.dto.ReservationDTO;
 import com.smartcity.parkingmanager.model.Reservation;
 
-
-
 @Service
-public class ReservationMapper {
-
-    public ReservationDTO toReservationDTO(Reservation reservation) {
+public class ReservationMapper
+{
+    public ReservationDTO toReservationDTO(Reservation reservation)
+    {
         ReservationDTO dto = new ReservationDTO();
         dto.setReservationId(reservation.getReservationId());
         dto.setUserId(reservation.getUser().getUserId());
@@ -19,5 +18,4 @@ public class ReservationMapper {
         dto.setEndTime(reservation.getEndTime());
         return dto;
     }
-
 }

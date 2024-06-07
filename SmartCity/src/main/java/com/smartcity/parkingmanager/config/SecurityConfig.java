@@ -8,14 +8,13 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig {
-
+public class SecurityConfig
+{
     @Autowired
     private UserService userService;
 
@@ -23,25 +22,26 @@ public class SecurityConfig {
     private PasswordEncoder passwordEncoder;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception
+    {
         http.csrf().disable()
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/users/register", "/api/users/login").permitAll()
-                        .requestMatchers("/api/parking-lots/**","/api/reservations/**").permitAll()
-                        .requestMatchers("/api/users/**","/api/admin/clearReservations").hasRole("ADMIN")
+                        .requestMatchers("/api/parking-lots/**", "/api/reservations/**").permitAll()
+                        .requestMatchers("/api/users/**", "/api/admin/clearReservations").hasRole("ADMIN")
                         .anyRequest().authenticated())
-                .httpBasic(); // Use HTTP Basic authentication
+                .httpBasic();
 
         return http.build();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception
+    {
         AuthenticationManagerBuilder authenticationManagerBuilder =
                 http.getSharedObject(AuthenticationManagerBuilder.class);
         authenticationManagerBuilder.userDetailsService(userService)
                 .passwordEncoder(passwordEncoder);
         return authenticationManagerBuilder.build();
     }
-
 }

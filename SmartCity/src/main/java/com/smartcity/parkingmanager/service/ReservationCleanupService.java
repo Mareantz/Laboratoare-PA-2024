@@ -7,12 +7,13 @@ import com.smartcity.parkingmanager.model.Reservation;
 import com.smartcity.parkingmanager.model.ParkingSpace;
 import com.smartcity.parkingmanager.repository.ReservationRepository;
 import com.smartcity.parkingmanager.repository.ParkingSpaceRepository;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-public class ReservationCleanupService {
-
+public class ReservationCleanupService
+{
     @Autowired
     private ReservationRepository reservationRepository;
 
@@ -23,9 +24,11 @@ public class ReservationCleanupService {
     private ParkingLotService parkingLotService;
 
     @Scheduled(fixedRate = 60000)
-    public void cleanupExpiredReservations() {
+    public void cleanupExpiredReservations()
+    {
         List<Reservation> expiredReservations = reservationRepository.findAllByEndTimeBefore(LocalDateTime.now());
-        for (Reservation reservation : expiredReservations) {
+        for (Reservation reservation : expiredReservations)
+        {
             ParkingSpace parkingSpace = reservation.getParkingSpace();
             parkingSpace.setReserved(false);
             parkingSpaceRepository.save(parkingSpace);

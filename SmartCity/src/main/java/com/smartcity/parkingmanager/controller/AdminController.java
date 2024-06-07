@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/admin")
-public class AdminController {
-
+public class AdminController
+{
     @Autowired
     private UserService userService;
 
@@ -27,7 +27,8 @@ public class AdminController {
     private ReservationService reservationService;
 
     @PostMapping("/create-admin")
-    public ResponseEntity<?> createAdmin(@RequestBody User user) {
+    public ResponseEntity<?> createAdmin(@RequestBody User user)
+    {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRole(UserRole.ADMIN);
         userService.saveUser(user);
@@ -35,7 +36,8 @@ public class AdminController {
     }
 
     @PostMapping("/clearReservations")
-    public ResponseEntity<String> clearAllReservations() {
+    public ResponseEntity<String> clearAllReservations()
+    {
         reservationService.clearAllReservations();
         return ResponseEntity.ok("All reservations cleared and parking lots reset");
     }

@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -24,20 +23,20 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
-public class UserController {
+public class UserController
+{
     @Autowired
     private UserService userService;
 
     @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
     private PasswordEncoder passwordEncoder;
+
     @Autowired
     private UserMapper userMapper;
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody UserRegistrationDTO userRegistrationDTO) {
+    public ResponseEntity<?> registerUser(@RequestBody UserRegistrationDTO userRegistrationDTO)
+    {
         User user = new User();
         user.setUsername(userRegistrationDTO.getUsername());
         user.setPassword(userRegistrationDTO.getPassword());
@@ -49,18 +48,23 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody User user) {
+    public ResponseEntity<?> loginUser(@RequestBody User user)
+    {
         Optional<User> existingUser = userService.findByUsername(user.getUsername());
-        if (existingUser.isPresent() && passwordEncoder.matches(user.getPassword(), existingUser.get().getPassword())) {
+        if (existingUser.isPresent() && passwordEncoder.matches(user.getPassword(), existingUser.get().getPassword()))
+        {
             UserDTO userDTO = userMapper.toUserDTO(existingUser.get());
             return ResponseEntity.ok(userDTO);
-        } else {
+        }
+        else
+        {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
     }
 
     @GetMapping
-    public List<UserDetailDTO> getAllUsers() {
+    public List<UserDetailDTO> getAllUsers()
+    {
         List<User> users = userService.getAllUsers();
         return users.stream()
                 .map(userMapper::toUserDetailDTO)
@@ -68,41 +72,51 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable Long id) {
+    public ResponseEntity<?> getUserById(@PathVariable Long id)
+    {
         User user = userService.getUserById(id);
-        if (user != null) {
+        if (user != null)
+        {
             UserDetailDTO userDetailDTO = userMapper.toUserDetailDTO(user);
             return ResponseEntity.ok(userDetailDTO);
-        } else {
+        }
+        else
+        {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
     }
 
     @PostMapping
-    public User createUser(@RequestBody User user) {
+    public User createUser(@RequestBody User user)
+    {
         return userService.saveUser(user);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<?> deleteUser(@PathVariable Long id)
+    {
         userService.deleteUser(id);
         return ResponseEntity.ok("User deleted successfully");
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User user) {
-        try {
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User user)
+    {
+        try
+        {
             Optional<User> existingUser = userService.findUserById(id);
-            if (existingUser.isPresent()) {
+            if (existingUser.isPresent())
+            {
                 userService.updateUser(id, user);
                 return ResponseEntity.ok("User updated successfully");
-            } else {
+            }
+            else
+            {
                 return ResponseEntity.notFound().build();
             }
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
 }
-
-

@@ -2,12 +2,17 @@ package com.smartcity.parkingmanager.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.List;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "parking_lots")
-public class ParkingLot {
-
+public class ParkingLot
+{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "parking_lot_id")
@@ -26,67 +31,10 @@ public class ParkingLot {
     private int availableSpaces;
 
     @OneToMany(mappedBy = "parkingLot", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference(value="parkingLot-parkingSpaces")
+    @JsonManagedReference(value = "parkingLot-parkingSpaces")
     private List<ParkingSpace> parkingSpaces;
 
     @OneToMany(mappedBy = "parkingLot", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference(value="parkingLot-reservations")
+    @JsonManagedReference(value = "parkingLot-reservations")
     private List<Reservation> reservations;
-
-    // Getters and Setters
-    public Long getParkingLotId() {
-        return parkingLotId;
-    }
-
-    public void setParkingLotId(Long parkingLotId) {
-        this.parkingLotId = parkingLotId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public int getCapacity() {
-        return capacity;
-    }
-
-    public void setCapacity(int capacity) {
-        this.capacity = capacity;
-    }
-
-    public int getAvailableSpaces() {
-        return availableSpaces;
-    }
-
-    public void setAvailableSpaces(int availableSpaces) {
-        this.availableSpaces = availableSpaces;
-    }
-
-    public List<ParkingSpace> getParkingSpaces() {
-        return parkingSpaces;
-    }
-
-    public void setParkingSpaces(List<ParkingSpace> parkingSpaces) {
-        this.parkingSpaces = parkingSpaces;
-    }
-
-    public List<Reservation> getReservations() {
-        return reservations;
-    }
-
-    public void setReservations(List<Reservation> reservations) {
-        this.reservations = reservations;
-    }
 }
