@@ -1,1 +1,1 @@
-This repository contains the laboratories and the project for the Advanced Programming course conducted during the 2nt semester of the 2nd year of the Bachelor's Degree at the Faculty of Computer Science Iași. The language used for this course is Java.
+This repository contains the laboratories and the project for the Advanced Programming course conducted during the 2nd semester of the 2nd year of the Bachelor's Degree at the Faculty of Computer Science Iași. The language used for this course is Java.
